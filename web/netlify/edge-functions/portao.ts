@@ -63,7 +63,9 @@ export default async function portao(req: Request, context: Contexto): Promise<R
   // Endereco antigo -> oficial, ANTES do portao: senao quem chega pelo antigo
   // resolveria o desafio duas vezes (o cookie e' por dominio). So' o nome
   // exato: previas de deploy ("<id>--validaurl.netlify.app") continuam.
-  if (url.hostname === DOMINIO_ANTIGO) {
+  // Só depois que o DNS do domínio oficial estiver no ar (REDIRECIONAR_DOMINIO=1),
+  // senão o redirect mandaria todo mundo para um endereço que ainda não resolve.
+  if (url.hostname === DOMINIO_ANTIGO && Netlify.env.get("REDIRECIONAR_DOMINIO") === "1") {
     return Response.redirect(`https://${DOMINIO_OFICIAL}${caminho}${url.search}`, 301);
   }
 
