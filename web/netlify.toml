@@ -1,0 +1,57 @@
+# ValidaURL (web) no Netlify: site estático + Functions (/api/*) + Edge Function
+# do portão anti-robô + Function agendada dos monitores (a cada 5 min).
+#
+# Variáveis no painel do Netlify:
+#   PORTAO_SEGREDO   (obrigatória; sem ela o site responde 500 de propósito)
+#   RESEND_API_KEY, AVISO_REMETENTE           (avisos por e-mail; opcionais)
+#   VAPID_PUBLICA, VAPID_PRIVADA, VAPID_CONTATO (notificação push; opcionais)
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[edge_functions]]
+  function = "portao"
+  path = "/*"
+  excludedPath = ["/api/confirmar"]
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Strict-Transport-Security = "max-age=31536000"
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[dev]
+  # `netlify dev` serve o build de verdade (rode `npm run build` antes): o modo
+  # dev do Vite injeta CSS inline, que a CSP bloqueia, e o `vite preview` atrás
+  # do proxy do netlify dev quebra a compressão (ERR_CONTENT_DECODING_FAILED).
+  framework = "#static"
+  publish = "dist"
+  port = 8888

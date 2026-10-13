@@ -1,0 +1,26 @@
+{
+  "name": "validaurl-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ValidaURL para navegador: confere se links respondem OK (200), rastreia sites, lê sitemaps e monitora com avisos.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "node --test \"test/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "fumaca": "node scripts/fumaca.mjs"
+  },
+  "dependencies": {
+    "@netlify/blobs": "11.1.1",
+    "fflate": "0.8.3",
+    "web-push": "3.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "@types/web-push": "3.6.4",
+    "typescript": "7.0.2",
+    "vite": "8.3.1"
+  }
+}

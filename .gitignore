@@ -1,0 +1,16 @@
+# Ambiente
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+
+# Build
+build/
+dist/
+
+# Web
+web/node_modules/
+web/dist/
+.netlify/
+web/.netlify/

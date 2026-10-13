@@ -1,0 +1,10 @@
+{
+  "name": "ValidaURL",
+  "short_name": "ValidaURL",
+  "description": "Confere se links respondem OK (200) e monitora com avisos.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1216",
+  "theme_color": "#1f6feb",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

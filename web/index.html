@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="ValidaURL: confere se links respondem OK (200) — lista, rastreio de site, sitemap e monitoramento com avisos.">
+  <title>ValidaURL</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca"><img src="/favicon.svg" alt="" width="28" height="28"><strong>ValidaURL</strong>
+      <span class="versao" id="versao"></span></div>
+    <nav class="abas" role="tablist">
+      <button role="tab" data-aba="lista" aria-selected="true">Lista</button>
+      <button role="tab" data-aba="rastreio">Rastrear site</button>
+      <button role="tab" data-aba="sitemap">Sitemap</button>
+      <button role="tab" data-aba="monitores">Monitores</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="painel" data-painel="lista">
+      <label for="txt-lista" class="rotulo">Cole as URLs (uma por linha, ou texto livre com links)</label>
+      <textarea id="txt-lista" rows="12" spellcheck="false" placeholder="https://www.exemplo.com.br/&#10;https://www.exemplo.com.br/contato"></textarea>
+      <div class="linha">
+        <label class="botao secundario">Abrir arquivo…<input type="file" id="arquivo" accept=".txt,.csv,.tsv,.xlsx,.xlsm,.html,.htm" hidden></label>
+        <button id="bt-salvar-lista" class="botao secundario" type="button">Salvar lista</button>
+        <button id="bt-limpar-lista" class="botao secundario" type="button">Limpar</button>
+        <span id="qtd-lista" class="discreto">0 URLs</span>
+        <span class="discreto">A lista fica guardada neste navegador. Arraste o canto da caixa para aumentar.</span>
+      </div>
+    </section>
+
+    <section class="painel" data-painel="rastreio" hidden>
+      <label for="ed-site" class="rotulo">Site</label>
+      <input id="ed-site" type="url" placeholder="https://www.seusite.com.br/" autocomplete="url">
+      <div class="linha opcoes">
+        <label>Máx. páginas <input id="sp-paginas" type="number" min="1" max="1000" value="200"></label>
+        <label>Profundidade <input id="sp-prof" type="number" min="0" max="50" value="10"></label>
+        <label><input id="ck-externos" type="checkbox" checked> Checar links externos</label>
+        <label><input id="ck-subdom" type="checkbox"> Incluir subdomínios</label>
+        <label><input id="ck-robots" type="checkbox" checked> Respeitar robots.txt</label>
+      </div>
+    </section>
+
+    <section class="painel" data-painel="sitemap" hidden>
+      <label for="ed-sitemap" class="rotulo">Sitemap (ou só o site: procura no robots.txt e em /sitemap.xml)</label>
+      <input id="ed-sitemap" type="url" placeholder="https://www.seusite.com.br/sitemap.xml">
+    </section>
+
+    <section class="painel" data-painel="monitores" hidden>
+      <div id="monitores"></div>
+    </section>
+
+    <div id="area-checagem">
+      <div class="linha opcoes">
+        <label><input id="ck-redirect" type="checkbox" checked> Seguir redirects</label>
+        <label><input id="ck-get" type="checkbox"> Só GET</label>
+      </div>
+      <div class="linha acoes">
+        <button id="bt-validar" class="botao">Validar</button>
+        <button id="bt-cancelar" class="botao secundario" disabled>Cancelar</button>
+        <button id="bt-rechecar" class="botao secundario" disabled>Re-checar problemas</button>
+        <button id="bt-csv" class="botao secundario" disabled>Exportar CSV</button>
+        <button id="bt-json" class="botao secundario" disabled>JSON</button>
+        <span class="espaco"></span>
+        <select id="cb-filtro" aria-label="Filtrar"></select>
+        <input id="ed-busca" type="search" placeholder="Buscar…" aria-label="Buscar">
+      </div>
+      <div class="progresso"><div id="barra"></div><span id="txt-progresso"></span></div>
+      <p id="resumo" class="resumo"></p>
+      <div class="tabela-rolagem">
+        <table id="tabela">
+          <thead><tr>
+            <th data-col="url">URL</th><th data-col="status" class="num">Status</th><th data-col="categoria">Categoria</th>
+            <th data-col="urlFinal">URL final</th><th data-col="redirects" class="num">Redir.</th>
+            <th data-col="tempoMs" class="num">Tempo (ms)</th><th data-col="erro">Erro</th><th data-col="encontradoEm">Encontrado em</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <footer class="rodape">ValidaURL — código aberto (MIT) · <a href="https://github.com/RicardoBiazin/validaurl" rel="noopener">GitHub</a> · versão para Windows na página de Releases</footer>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
