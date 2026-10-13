@@ -79,6 +79,14 @@ class JanelaPrincipal(QMainWindow):
         self.temporizador = QTimer(self)
         self.temporizador.setInterval(120)
         self.temporizador.timeout.connect(self._recolher)
+        # Grava sozinho logo depois de cada edição: a lista não se perde se o
+        # Windows desligar ou o processo for encerrado sem passar pelo fechar.
+        self.autosalvar = QTimer(self)
+        self.autosalvar.setSingleShot(True)
+        self.autosalvar.setInterval(800)
+        self.autosalvar.timeout.connect(self._autosalvar)
+        for sinal in (self.txt_lista.textChanged, self.ed_site.textChanged, self.ed_sitemap.textChanged):
+            sinal.connect(self.autosalvar.start)
         self._rechecando = False
         self._atualizar_botoes()
 
@@ -332,6 +340,10 @@ class JanelaPrincipal(QMainWindow):
         c.setValue("aba", self.abas.currentIndex())
         c.setValue("minutos", self.sp_minutos.value())
         c.setValue("avisos", json.dumps(self.cfg_avisos.como_dict(segredos.proteger), ensure_ascii=False))
+
+    def _autosalvar(self):
+        self._salvar_config()
+        self.config.sync()
 
     def closeEvent(self, ev):
         if self.ck_monitor.isChecked() and self.bandeja is not None and not self._saindo:

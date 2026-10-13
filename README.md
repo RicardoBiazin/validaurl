@@ -2,7 +2,7 @@
 
 Confere se links respondem **OK (200)**. Há uma versão **desktop** (Windows, PySide6) e uma **web** (Netlify).
 
-- **Lista de URLs**: cole o texto ou abra um arquivo TXT, CSV, XLSX ou HTML. A lista pode ser salva e volta sozinha na próxima vez.
+- **Lista de URLs**: cole o texto ou abra um arquivo TXT, CSV, XLSX ou HTML. A lista pode ser salva em arquivo, e o programa a grava sozinho enquanto você digita: ela volta na próxima vez, mesmo que o Windows desligue com ele aberto.
 - **Rastrear site**: segue os links internos e checa tudo o que encontrar, inclusive imagens, CSS e JS. A coluna *Encontrado em* mostra em qual página está o link quebrado.
 - **Sitemap**: aceita sitemap index e `.xml.gz`. Se você informar só o site, ele procura o sitemap no `robots.txt` e em `/sitemap.xml`.
 - **Monitoramento**: repete a checagem a cada X minutos e avisa quando um link **passa a falhar** ou **volta ao normal**, por e-mail, webhook ou notificação.

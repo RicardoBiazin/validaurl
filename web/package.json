@@ -1,7 +1,7 @@
 {
   "name": "validaurl-web",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ValidaURL para navegador: confere se links respondem OK (200), rastreia sites, lê sitemaps e monitora com avisos.",
   "license": "MIT",
   "type": "module",

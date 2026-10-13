@@ -177,6 +177,22 @@ class TesteJanela(unittest.TestCase):
         finally:
             outra.close()
 
+    def test_autosalva_sem_fechar(self):
+        # Simula o processo morrendo: outra janela lê a config SEM esta ter fechado.
+        self.j.txt_lista.setPlainText("https://autosalvo.com.br/x")
+        self.assertTrue(self.j.autosalvar.isActive())
+        from PySide6.QtCore import QElapsedTimer
+        relogio = QElapsedTimer()
+        relogio.start()
+        while self.j.autosalvar.isActive() and relogio.elapsed() < 5000:
+            APP.processEvents()
+        outra = JanelaPrincipal()
+        try:
+            self.assertIn("autosalvo.com.br", outra.txt_lista.toPlainText())
+            self.assertFalse(outra.autosalvar.isActive(), "carregar a config não dispara gravação")
+        finally:
+            outra.close()
+
     def test_lista_vazia_nao_salva(self):
         self.j.txt_lista.setPlainText("")
         with mock.patch("validaurl.interface.janela.QFileDialog.getSaveFileName") as dlg:
