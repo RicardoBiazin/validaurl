@@ -335,6 +335,28 @@ export function textoAviso(mon: Monitor, m: Mudancas, a: Ambiente): { assunto: s
   return { assunto, texto: partes.join("\n"), curto };
 }
 
+/** Formato aceito por cada serviço (igual ao desktop, validaurl/avisos.py).
+ *  Google Chat recusa com 400 qualquer campo fora do recurso Message: só {text},
+ *  título em *negrito*. Discord quer "content" (até 2000), Slack quer "text". */
+export function adaptarAoDestino(url: string, dados: { text: string } & Record<string, unknown>): Record<string, unknown> {
+  let host = "";
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch { /* fica o JSON completo */ }
+  const texto = dados.text;
+  if (host === "chat.googleapis.com") {
+    const i = texto.indexOf("\n");
+    const titulo = i < 0 ? texto : texto.slice(0, i);
+    const resto = i < 0 ? "" : texto.slice(i + 1);
+    return { text: `*${titulo}*\n${resto}`.slice(0, 4000) };
+  }
+  if (["discord.com", "discordapp.com", "ptb.discord.com", "canary.discord.com"].includes(host)) {
+    return { content: texto.slice(0, 2000) };
+  }
+  if (host === "hooks.slack.com") return { text: texto.slice(0, 39000) };
+  return dados;
+}
+
 /** Envia os avisos. Devolve os erros; assinaturas push vencidas (404/410) saem do monitor. */
 export async function avisar(mon: Monitor, m: Mudancas, a: Ambiente, teste = false): Promise<string[]> {
   if (!teste && !haAviso(m, mon)) return [];
@@ -357,7 +379,7 @@ export async function avisar(mon: Monitor, m: Mudancas, a: Ambiente, teste = fal
       novos_problemas: m.novos.map(item), recuperados: m.recuperados.map(item), ainda_com_problema: m.ainda.map(item),
     };
     try {
-      await (a.postar ?? postarJson)(mon.avisos.webhook, dados);
+      await (a.postar ?? postarJson)(mon.avisos.webhook, adaptarAoDestino(mon.avisos.webhook, dados));
     } catch (e) {
       erros.push(`Webhook: ${(e as Error).message}`);
     }

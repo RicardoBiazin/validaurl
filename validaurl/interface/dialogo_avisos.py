@@ -44,7 +44,9 @@ class DialogoAvisos(QDialog):
         grupo = QGroupBox("Webhook (Slack, Discord, Teams, Google Chat, n8n, Zapier…)")
         lay = QHBoxLayout(grupo)
         self.ed_webhook = QLineEdit(cfg.webhook)
-        self.ed_webhook.setPlaceholderText("https://hooks.slack.com/services/…  (vazio = desligado)")
+        self.ed_webhook.setPlaceholderText("https://chat.googleapis.com/v1/spaces/…  (vazio = desligado)")
+        self.ed_webhook.setToolTip("Google Chat: no espaço, Apps e integrações → Webhooks → Adicionar webhook.\n"
+                                   "Também serve Slack, Discord, Teams (Power Automate), n8n, Zapier.")
         lay.addWidget(self.ed_webhook, 1)
         bt = QPushButton("Testar")
         bt.clicked.connect(self._testar_webhook)

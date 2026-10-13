@@ -13,6 +13,7 @@ import ssl
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from email.message import EmailMessage
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -161,7 +162,28 @@ def payload_webhook(m: Mudancas, alvo: str, assunto: str, corpo: str) -> dict:
     }
 
 
+def adaptar_ao_destino(url: str, dados: dict) -> dict:
+    """Formato que cada serviço aceita.
+
+    Google Chat (chat.googleapis.com) recusa com 400 qualquer campo que não
+    seja do recurso Message: vai só {"text"}, com o título em *negrito*.
+    Discord quer "content" (até 2000 caracteres), Slack quer "text". Os demais
+    (Teams/Power Automate, n8n, Zapier, servidor próprio) recebem o JSON completo.
+    """
+    host = (urlsplit(url).hostname or "").lower()
+    texto = dados.get("text", "")
+    if host == "chat.googleapis.com":
+        titulo, _, resto = texto.partition("\n")
+        return {"text": (f"*{titulo}*\n{resto}" if titulo else resto)[:4000]}
+    if host in ("discord.com", "discordapp.com", "ptb.discord.com", "canary.discord.com"):
+        return {"content": texto[:2000]}
+    if host == "hooks.slack.com":
+        return {"text": texto[:39000]}
+    return dados
+
+
 def enviar_webhook(url: str, dados: dict, timeout: float = 15) -> int:
+    dados = adaptar_ao_destino(url, dados)
     r = httpx.post(url, content=json.dumps(dados, ensure_ascii=False).encode("utf-8"),
                    headers={"Content-Type": "application/json; charset=utf-8", "User-Agent": f"{NOME}/{VERSAO}"},
                    timeout=timeout, follow_redirects=True)

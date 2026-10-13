@@ -10,7 +10,7 @@ from servidor_teste import Manipulador, Servidor, SMTPFalso  # noqa: E402
 
 from validaurl import segredos  # noqa: E402
 from validaurl.avisos import (  # noqa: E402
-    ConfigAvisos, ConfigEmail, comparar, disparar, enviar_email, montar_texto, payload_webhook,
+    ConfigAvisos, adaptar_ao_destino, ConfigEmail, comparar, disparar, enviar_email, montar_texto, payload_webhook,
 )
 from validaurl.verificador import Resultado  # noqa: E402
 
@@ -49,6 +49,21 @@ class TesteComparar(unittest.TestCase):
         self.assertIn("content", dados)
         self.assertEqual(dados["novos_problemas"][0]["status"], 404)
 
+
+class TesteFormatoWebhook(unittest.TestCase):
+    def test_por_servico(self):
+        m = comparar(None, [R("https://b.com", 404, "Erro 4xx")])
+        assunto, corpo = montar_texto(m, "site.com")
+        dados = payload_webhook(m, "site.com", assunto, corpo)
+        google = adaptar_ao_destino("https://chat.googleapis.com/v1/spaces/AAA/messages?key=k&token=t", dados)
+        self.assertEqual(list(google), ["text"])  # Google Chat recusa campo desconhecido
+        self.assertTrue(google["text"].startswith(f"*{assunto}*\n"))
+        self.assertIn("[404] https://b.com", google["text"])
+        self.assertEqual(list(adaptar_ao_destino("https://discord.com/api/webhooks/1/x", dados)), ["content"])
+        self.assertEqual(list(adaptar_ao_destino("https://hooks.slack.com/services/x", dados)), ["text"])
+        self.assertIs(adaptar_ao_destino("https://n8n.empresa.com/webhook/x", dados), dados)
+        longo = dict(dados, text="t\n" + "x" * 9000)
+        self.assertLessEqual(len(adaptar_ao_destino("https://chat.googleapis.com/v1/spaces/A/messages", longo)["text"]), 4000)
 
 class TesteEnvio(unittest.TestCase):
     def test_webhook_e_email(self):

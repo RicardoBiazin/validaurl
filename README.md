@@ -30,6 +30,7 @@ Baixe o `ValidaURL.exe` em [Releases](https://github.com/RicardoBiazin/validaurl
   - **Notificação**: aparece na bandeja do Windows.
   - **E-mail**: vai pelo seu SMTP. No Gmail e no Outlook, use uma "senha de app". A senha fica gravada cifrada pela DPAPI do Windows.
   - **Webhook**: manda um JSON que já serve para Slack e Google Chat (`text`), Discord (`content`) e Teams, além dos dados estruturados.
+- **Google Chat**: no espaço, abra *Apps e integrações → Webhooks → Adicionar webhook*, copie a URL (`https://chat.googleapis.com/v1/spaces/…`) e cole no campo Webhook. O ValidaURL manda só `{"text"}`, com o título em negrito, que é o formato que o Google Chat aceita. Para Discord e Slack, o formato também é ajustado sozinho.
 - A exportação sai em XLSX (colorido), CSV (`;` com BOM, abre direto no Excel) ou JSON. Exporta só o que o filtro está mostrando.
 - O divisor entre a lista e a tabela pode ser arrastado.
 

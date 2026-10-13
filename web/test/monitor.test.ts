@@ -2,7 +2,7 @@ import { after, before, beforeEach, test } from "node:test";
 import assert from "node:assert/strict";
 import { tratarConfirmacao, tratarMonitores } from "../servidor/api-monitores.ts";
 import { zerarLimites } from "../servidor/acesso.ts";
-import { type Ambiente, armazemMemoria, comparar, type Monitor, rodarVencidos, validar } from "../servidor/monitor.ts";
+import { adaptarAoDestino, type Ambiente, armazemMemoria, comparar, type Monitor, rodarVencidos, validar } from "../servidor/monitor.ts";
 import { liberarLoopbackParaTestes } from "../servidor/rede.ts";
 import { type Local, servidorLocal } from "./ajudantes.ts";
 
@@ -175,4 +175,14 @@ test("agenda: roda só os vencidos e ativos, e reagenda", async () => {
   assert.ok(m.proximaEm > agora + 4 * 60_000);
   assert.equal(m.historico.length, 1);
   assert.deepEqual(await rodarVencidos(loja, a, agora + 60_000), { rodados: 0, pendentes: 0 }, "nada vencido");
+});
+
+test("webhook no formato de cada serviço (Google Chat só aceita text)", () => {
+  const dados = { text: "Título\nCorpo [404] https://b.com", content: "x", monitor: "m", novos_problemas: [] };
+  const g = adaptarAoDestino("https://chat.googleapis.com/v1/spaces/AAA/messages?key=k&token=t", dados);
+  assert.deepEqual(Object.keys(g), ["text"]);
+  assert.equal(g.text, "*Título*\nCorpo [404] https://b.com");
+  assert.deepEqual(Object.keys(adaptarAoDestino("https://discord.com/api/webhooks/1/x", dados)), ["content"]);
+  assert.deepEqual(Object.keys(adaptarAoDestino("https://hooks.slack.com/services/x", dados)), ["text"]);
+  assert.equal(adaptarAoDestino("https://n8n.exemplo.com/webhook", dados), dados);
 });
