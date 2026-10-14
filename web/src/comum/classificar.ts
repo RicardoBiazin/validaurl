@@ -49,3 +49,54 @@ export interface Resultado extends Checagem {
   categoria: string;
   encontradoEm: string;
 }
+
+/* Tipo de conteúdo (Content-Type, sem parâmetros) -> nome que aparece na tabela.
+ * Mesma tabela do desktop (validaurl/classificar.py). O que não estiver aqui
+ * mostra o próprio tipo, para não esconder nada. */
+const TIPOS: Record<string, string> = {
+  "text/html": "HTML",
+  "application/xhtml+xml": "HTML",
+  "text/css": "CSS",
+  "text/javascript": "JavaScript",
+  "application/javascript": "JavaScript",
+  "application/x-javascript": "JavaScript",
+  "application/json": "JSON",
+  "text/json": "JSON",
+  "application/xml": "XML",
+  "text/xml": "XML",
+  "text/plain": "Texto",
+  "text/markdown": "Markdown",
+  "text/csv": "CSV",
+  "application/pdf": "PDF",
+  "application/msword": "Word (.doc)",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word (.docx)",
+  "application/vnd.ms-excel": "Excel (.xls)",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel (.xlsx)",
+  "application/vnd.ms-powerpoint": "PowerPoint (.ppt)",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "PowerPoint (.pptx)",
+  "image/png": "PNG",
+  "image/jpeg": "JPEG",
+  "image/gif": "GIF",
+  "image/webp": "WebP",
+  "image/avif": "AVIF",
+  "image/svg+xml": "SVG",
+  "image/x-icon": "ICO",
+  "image/vnd.microsoft.icon": "ICO",
+  "video/mp4": "Vídeo MP4",
+  "video/webm": "Vídeo WebM",
+  "audio/mpeg": "Áudio MP3",
+  "application/zip": "ZIP",
+  "application/gzip": "GZIP",
+  "application/x-gzip": "GZIP",
+  "application/x-rar-compressed": "RAR",
+  "application/x-7z-compressed": "7z",
+  "application/octet-stream": "Binário",
+  "application/x-msdownload": "Executável",
+  "application/x-msdos-program": "Executável",
+};
+
+/** Nome legível do tipo de conteúdo ('' se o servidor não informou). */
+export function rotuloTipo(mime: string): string {
+  if (!mime) return "";
+  return TIPOS[mime.trim().toLowerCase()] ?? mime;
+}

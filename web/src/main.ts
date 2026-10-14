@@ -1,6 +1,6 @@
 import "./estilo.css";
 import { baixar, paraCsv, urlsDoArquivo } from "./arquivos.ts";
-import { CLASSE_CSS, ehProblema, type Resultado, TODAS } from "./comum/classificar.ts";
+import { CLASSE_CSS, ehProblema, type Resultado, rotuloTipo, TODAS } from "./comum/classificar.ts";
 import { comEsquema, urlsDoTexto } from "./comum/entradas.ts";
 import { normalizar } from "./comum/links.ts";
 import { ErroApi, rastrear, urlsDoSitemap, validarLista } from "./motor.ts";
@@ -130,6 +130,13 @@ function celulaTexto(texto: string, classe = ""): HTMLTableCellElement {
   return td;
 }
 
+/** Coluna Tipo: nome legível; o Content-Type original fica no balão de ajuda. */
+function tipoCelula(r: Resultado): HTMLTableCellElement {
+  const td = celulaTexto(rotuloTipo(r.tipo));
+  if (r.tipo) td.title = `Content-Type: ${r.tipo}`;
+  return td;
+}
+
 function render() {
   pendenteRender = false;
   const corpo = document.querySelector("#tabela tbody")!;
@@ -140,7 +147,7 @@ function render() {
     tr.className = CLASSE_CSS[r.categoria] ?? "";
     const redir = celulaTexto(r.redirects.length ? String(r.redirects.length) : "", "num");
     if (r.redirects.length) redir.title = r.redirects.map((x) => `${x.status} ${x.url}`).join("\n") + `\n→ ${r.status} ${r.urlFinal}`;
-    tr.append(celulaLink(r.url), celulaTexto(r.status === null ? "" : String(r.status), "num"), celulaTexto(r.categoria), celulaTexto(r.tipo),
+    tr.append(celulaLink(r.url), celulaTexto(r.status === null ? "" : String(r.status), "num"), celulaTexto(r.categoria), tipoCelula(r),
       celulaLink(r.urlFinal && r.urlFinal !== r.url ? r.urlFinal : ""), redir, celulaTexto(String(r.tempoMs), "num"),
       celulaTexto(r.erro), celulaLink(r.encontradoEm));
     fragmento.append(tr);

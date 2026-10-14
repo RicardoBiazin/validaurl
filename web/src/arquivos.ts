@@ -1,7 +1,7 @@
 /* Leitura de TXT/CSV/HTML/XLSX no navegador e exportação CSV/JSON. */
 
 import { unzipSync, strFromU8 } from "fflate";
-import type { Resultado } from "./comum/classificar.ts";
+import { type Resultado, rotuloTipo } from "./comum/classificar.ts";
 import { deduplicar, urlsDoTexto } from "./comum/entradas.ts";
 import { extrairLinks } from "./comum/links.ts";
 
@@ -46,7 +46,7 @@ function celula(v: unknown): string {
 export function paraCsv(resultados: Resultado[]): string {
   const linhas = [COLUNAS.join(";")];
   for (const r of resultados) {
-    linhas.push([r.url, r.status ?? "", r.categoria, r.tipo, r.urlFinal && r.urlFinal !== r.url ? r.urlFinal : "",
+    linhas.push([r.url, r.status ?? "", r.categoria, rotuloTipo(r.tipo), r.urlFinal && r.urlFinal !== r.url ? r.urlFinal : "",
       r.redirects.map((x) => `${x.status} ${x.url}`).join(" → "), r.tempoMs, r.erro, r.encontradoEm].map(celula).join(";"));
   }
   return "﻿" + linhas.join("\r\n");

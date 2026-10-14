@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 from . import VERSAO
-from .classificar import CORES
+from .classificar import CORES, rotulo_tipo
 from .verificador import Resultado
 
 COLUNAS = ["URL", "Status", "Categoria", "Tipo", "URL final", "Redirects", "Tempo (ms)", "Erro", "Encontrado em"]
@@ -18,7 +18,7 @@ def linha(r: Resultado) -> list:
         r.url,
         r.status if r.status is not None else "",
         r.categoria,
-        r.tipo,
+        rotulo_tipo(r.tipo),
         r.url_final if r.url_final and r.url_final != r.url else "",
         " → ".join(f"{s} {u}" for s, u in r.redirects),
         r.tempo_ms,

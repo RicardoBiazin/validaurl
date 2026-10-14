@@ -5,7 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QBrush, QColor
 
-from ..classificar import CORES, eh_problema
+from ..classificar import CORES, eh_problema, rotulo_tipo
 from ..links import normalizar
 from ..verificador import Resultado
 
@@ -96,6 +96,8 @@ class ModeloResultados(QAbstractTableModel):
         if papel == Qt.ToolTipRole:
             if col == COL_REDIRECTS and r.redirects:
                 return "\n".join(f"{s}  {u}" for s, u in r.redirects) + f"\n→ {r.status}  {r.url_final}"
+            if col == COL_TIPO and r.tipo:
+                return f"Content-Type: {r.tipo}"  # o valor original, para quem precisa conferir
             if col in (COL_URL, COL_FINAL, COL_ERRO, COL_ORIGEM):
                 return self._texto(r, col) or None
         if papel == Qt.TextAlignmentRole and col in (COL_STATUS, COL_REDIRECTS, COL_TEMPO):
@@ -111,7 +113,7 @@ class ModeloResultados(QAbstractTableModel):
         if col == COL_CATEGORIA:
             return r.categoria
         if col == COL_TIPO:
-            return r.tipo
+            return rotulo_tipo(r.tipo)
         if col == COL_FINAL:
             return r.url_final if r.url_final and r.url_final != r.url else ""
         if col == COL_REDIRECTS:

@@ -255,7 +255,7 @@ class TesteExportar(unittest.TestCase):
                 exportar(res, Path(d) / f"r.{ext}")
             csv_txt = (Path(d) / "r.csv").read_text(encoding="utf-8-sig")
             self.assertTrue(csv_txt.startswith("URL;Status;Categoria;Tipo;"))
-            self.assertIn(";text/html;", csv_txt, "o tipo do arquivo entra no CSV")
+            self.assertIn(";HTML;", csv_txt, "o tipo do arquivo entra no CSV, com nome legível")
             self.assertIn("302 ", csv_txt)
             dados = json.loads((Path(d) / "r.json").read_text(encoding="utf-8"))
             self.assertEqual(len(dados["resultados"]), 3)
@@ -264,8 +264,23 @@ class TesteExportar(unittest.TestCase):
             ws = wb.active
             self.assertEqual(ws.max_row, 4)
             self.assertEqual(ws["C4"].value, C.ERRO_CLIENTE)
-            self.assertEqual(ws["D2"].value, "text/html", "coluna Tipo na planilha")
+            self.assertEqual(ws["D2"].value, "HTML", "coluna Tipo na planilha")
             wb.close()
+
+
+class TesteRotuloTipo(unittest.TestCase):
+    def test_nomes_legiveis(self):
+        from validaurl.classificar import rotulo_tipo
+        self.assertEqual(rotulo_tipo("text/html"), "HTML")
+        self.assertEqual(rotulo_tipo("application/pdf"), "PDF")
+        self.assertEqual(rotulo_tipo("image/png"), "PNG")
+        self.assertEqual(rotulo_tipo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"), "Excel (.xlsx)")
+        self.assertEqual(rotulo_tipo("TEXT/HTML"), "HTML", "sem diferenciar maiúsculas")
+
+    def test_desconhecido_e_vazio(self):
+        from validaurl.classificar import rotulo_tipo
+        self.assertEqual(rotulo_tipo(""), "", "servidor que não informou o tipo fica vazio")
+        self.assertEqual(rotulo_tipo("application/x-algo-novo"), "application/x-algo-novo", "desconhecido mostra o original")
 
 
 if __name__ == "__main__":

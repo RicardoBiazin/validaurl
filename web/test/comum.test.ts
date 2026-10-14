@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { strToU8, zipSync } from "fflate";
-import { classificar, ehProblema } from "../src/comum/classificar.ts";
+import { classificar, ehProblema, rotuloTipo } from "../src/comum/classificar.ts";
 import { comEsquema, urlsDoTexto } from "../src/comum/entradas.ts";
 import { ehRecurso, extrairLinks, mesmoSite, normalizar, regrasRobots, robotsPermite } from "../src/comum/links.ts";
 import { paraCsv, textoDoXlsx } from "../src/arquivos.ts";
@@ -74,4 +74,16 @@ test("CSV com BOM, ';' e sem fórmula injetada", () => {
   assert.ok(csv.startsWith("﻿URL;Status;Categoria;Tipo;"));
   assert.match(csv, /\n"'=HYPERLINK\(""http:\/\/mal""\)";404/);
   assert.match(csv, /"Not; Found"/);
+});
+
+test("tipo de conteúdo com nome legível (igual ao desktop)", () => {
+  assert.equal(rotuloTipo("text/html"), "HTML");
+  assert.equal(rotuloTipo("application/pdf"), "PDF");
+  assert.equal(rotuloTipo("image/png"), "PNG");
+  assert.equal(rotuloTipo("TEXT/HTML"), "HTML", "sem diferenciar maiúsculas");
+  assert.equal(rotuloTipo(""), "", "servidor que não informou o tipo fica vazio");
+  assert.equal(rotuloTipo("application/x-algo-novo"), "application/x-algo-novo", "desconhecido mostra o original");
+  const csv = paraCsv([{ url: "https://x.com/a.pdf", status: 200, categoria: "OK", urlFinal: "", redirects: [],
+    tempoMs: 5, erro: "", tipo: "application/pdf", metodo: "HEAD", encontradoEm: "" }]);
+  assert.match(csv, /;OK;PDF;/);
 });

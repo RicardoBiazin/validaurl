@@ -10,7 +10,7 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from PySide6.QtCore import QSettings  # noqa: E402
+from PySide6.QtCore import Qt, QSettings  # noqa: E402
 from PySide6.QtWidgets import QApplication, QMessageBox  # noqa: E402
 
 from servidor_teste import Manipulador, Servidor  # noqa: E402
@@ -89,7 +89,8 @@ class TesteJanela(unittest.TestCase):
         self.j.iniciar()
         self.assertTrue(self.j.esperar())
         m = self.j.modelo
-        self.assertEqual(m.data(m.index(0, COL_TIPO)), "text/html")
+        self.assertEqual(m.data(m.index(0, COL_TIPO)), "HTML")
+        self.assertIn("text/html", m.data(m.index(0, COL_TIPO), Qt.ToolTipRole))
 
     def test_exportar_so_visiveis(self):
         self.j.txt_lista.setPlainText(f"{self.srv.url('/ok')}\n{self.srv.url('/nada')}")
