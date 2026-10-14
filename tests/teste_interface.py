@@ -107,7 +107,7 @@ class TesteJanela(unittest.TestCase):
 
     def test_rastreio(self):
         self.j.abas.setCurrentIndex(ABA_RASTREIO)
-        self.j.ed_site.setText(self.srv.url("/site/"))
+        self.j.ed_site.setPlainText(self.srv.url("/site/"))
         self.j.ck_externos.setChecked(False)
         self.j.iniciar()
         self.assertTrue(self.j.esperar())

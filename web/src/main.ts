@@ -258,14 +258,18 @@ function validar() {
     total = urls.length;
     void executar((sinal) => validarLista(urls.map((url) => ({ url })), opcoes(), adicionar, sinal));
   } else if (abaAtual === "rastreio") {
-    const ed = $<HTMLInputElement>("ed-site");
-    const site = comEsquema(ed.value);
-    try {
-      new URL(site);
-    } catch {
-      return alert("Informe o endereço do site.");
+    // Um endereço por linha: cada um é checado e tem os links internos seguidos.
+    const ed = $<HTMLTextAreaElement>("ed-site");
+    const sites = ed.value.split(/\r?\n/).map((x) => x.trim()).filter(Boolean).map(comEsquema);
+    if (!sites.length) return alert("Informe pelo menos um endereço do site.");
+    for (const site of sites) {
+      try {
+        new URL(site);
+      } catch {
+        return alert(`Endereço inválido: ${site}`);
+      }
     }
-    ed.value = site;
+    ed.value = sites.join("\n");
     limpar();
     const op = {
       ...opcoes(),
@@ -275,7 +279,7 @@ function validar() {
       externos: $<HTMLInputElement>("ck-externos").checked,
       robots: $<HTMLInputElement>("ck-robots").checked,
     };
-    void executar((sinal, avisos) => rastrear(site, op, adicionar, (p) => {
+    void executar((sinal, avisos) => rastrear(sites, op, adicionar, (p) => {
       total = p.agendados;
       progresso(resultados.length, total, `  ·  ${p.paginas} páginas abertas`);
     }, avisos, sinal));
@@ -314,7 +318,7 @@ $("bt-rechecar").addEventListener("click", () => {
 $("bt-csv").addEventListener("click", () => baixar("validaurl.csv", paraCsv(visiveis()), "text/csv;charset=utf-8"));
 $("bt-json").addEventListener("click", () => baixar("validaurl.json",
   JSON.stringify({ geradoPor: `ValidaURL web ${__VERSAO__}`, resultados: visiveis() }, null, 2), "application/json"));
-for (const id of ["ed-site", "ed-sitemap"]) {
+for (const id of ["ed-sitemap"]) {
   $(id).addEventListener("keydown", (e) => (e as KeyboardEvent).key === "Enter" && validar());
 }
 document.addEventListener("keydown", (e) => {

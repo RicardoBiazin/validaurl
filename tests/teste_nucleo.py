@@ -205,6 +205,17 @@ class TesteRastreio(unittest.TestCase):
         self.assertEqual(len(res), len({r.url for r in res}))
         self.assertFalse(any(u.startswith("mailto") or "javascript" in u for u in por_url))
 
+    def test_varios_inicios(self):
+        # Lista de endereços de partida: todos são checados e seguidos, sem duplicar resultados.
+        with Servidor() as srv:
+            res = rastrear([srv.url("/ok"), srv.url("/site/"), srv.url("/site/")], Opcoes(timeout=3),
+                           OpcoesRastreio(respeitar_robots=False, checar_externos=False))
+        caminhos = [r.url.replace(srv.base, "") for r in res]
+        self.assertIn("/ok", caminhos)
+        self.assertIn("/site/", caminhos)
+        self.assertIn("/site/c", caminhos, "link achado a partir do segundo endereço")
+        self.assertEqual(len(caminhos), len(set(caminhos)), "sem repetição")
+
     def test_inicio_redireciona_para_fora(self):
         # A página inicial sai do site: não há links para seguir, e o programa avisa o porquê.
         with Servidor() as srv:

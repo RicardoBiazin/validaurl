@@ -60,7 +60,7 @@ def _robots(cliente: httpx.Client, inicio: str) -> RobotFileParser | None:
 
 
 def rastrear(
-    inicio: str,
+    inicios: str | list[str],
     opcoes: Opcoes | None = None,
     opc: OpcoesRastreio | None = None,
     ao_resultado: Callable[[Resultado], None] | None = None,
@@ -72,10 +72,13 @@ def rastrear(
     opc = opc or OpcoesRastreio()
     cancelar = cancelar or threading.Event()
     avisos = avisos if avisos is not None else []
-    motivo = url_valida(inicio)
-    if motivo:
-        raise ValueError(motivo)
-    inicio = sem_fragmento(inicio)
+    # Um endereço ou vários (um por linha): cada um é checado e tem os links internos seguidos.
+    raizes = [inicios] if isinstance(inicios, str) else list(inicios)
+    for bruto in raizes:
+        motivo = url_valida(bruto)
+        if motivo:
+            raise ValueError(motivo)
+    raizes = list(dict.fromkeys(sem_fragmento(u) for u in raizes))
 
     resultados: list[Resultado] = []
     vistos: set[str] = set()
@@ -85,7 +88,20 @@ def rastrear(
     avisou_limite = False
 
     with novo_cliente(opcoes) as cliente, ThreadPoolExecutor(max_workers=max(opcoes.concorrencia, 1)) as pool:
-        robots = _robots(cliente, inicio) if opc.respeitar_robots else None
+        robots_por_origem: dict[str, RobotFileParser | None] = {}
+
+        def pode_robots(url: str) -> bool:
+            if not opc.respeitar_robots:
+                return True
+            p = urlsplit(url)
+            origem = f"{p.scheme}://{p.netloc}"
+            if origem not in robots_por_origem:
+                robots_por_origem[origem] = _robots(cliente, origem + "/")
+            rp = robots_por_origem[origem]
+            return rp is None or rp.can_fetch(USER_AGENT, url)
+
+        def eh_interno(url: str) -> bool:
+            return any(mesmo_site(url, raiz, opc.subdominios) for raiz in raizes)
 
         def tarefa(url: str, origem: str, abrir: bool):
             with limite.de(url):
@@ -98,14 +114,13 @@ def rastrear(
             chave = normalizar(url)
             if chave in vistos:
                 return
-            interno = mesmo_site(url, inicio, opc.subdominios)
+            interno = eh_interno(url)
             if not interno and not opc.checar_externos:
                 return
             vistos.add(chave)
             abrir = False
             if interno and not eh_recurso(url) and profundidade <= opc.profundidade:
-                pode_robots = robots is None or robots.can_fetch(USER_AGENT, url)
-                if contagem["paginas"] < opc.max_paginas and pode_robots:
+                if contagem["paginas"] < opc.max_paginas and pode_robots(url):
                     abrir = True
                     contagem["paginas"] += 1
                 elif contagem["paginas"] >= opc.max_paginas and not avisou_limite:
@@ -116,7 +131,8 @@ def rastrear(
             fut = pool.submit(tarefa, url, origem, abrir)
             pendentes[fut] = (url, profundidade, abrir)
 
-        agendar(inicio, 0, "")
+        for raiz in raizes:
+            agendar(raiz, 0, "")
         while pendentes:
             feitos, _ = wait(list(pendentes), timeout=0.25, return_when=FIRST_COMPLETED)
             if cancelar.is_set():
@@ -133,15 +149,19 @@ def rastrear(
                 if ao_resultado:
                     ao_resultado(res)
                 if (abrir and html and not cancelar.is_set() and "html" in (res.tipo or "text/html")
-                        and mesmo_site(res.url_final or url, inicio, opc.subdominios)):
+                        and eh_interno(res.url_final or url)):
                     pagina = res.url_final or url
                     for link in extrair_links(html, pagina):
                         agendar(link, prof + 1, pagina)
                 if ao_progresso:
                     ao_progresso(Progresso(len(resultados), contagem["agendados"], contagem["paginas"]))
-    inicial = next((r for r in resultados if r.url == inicio), None)
-    if inicial and inicial.url_final and not mesmo_site(inicial.url_final, inicio):
-        avisos.append(aviso_redirecionamento_fora(urlsplit(inicial.url_final).hostname or inicial.url_final))
+    for raiz in raizes:
+        inicial = next((r for r in resultados if r.url == raiz), None)
+        if inicial and inicial.url_final and not mesmo_site(inicial.url_final, raiz):
+            host = urlsplit(inicial.url_final).hostname or inicial.url_final
+            aviso = aviso_redirecionamento_fora(host)
+            if aviso not in avisos:
+                avisos.append(aviso)
     return resultados
 
 

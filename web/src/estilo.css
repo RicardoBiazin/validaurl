@@ -45,6 +45,7 @@ main { max-width: 1400px; margin: 0 auto; padding: 16px; }
 textarea, input[type=url], input[type=text], input[type=email], input[type=search], input[type=number], select {
   width: 100%; font: inherit; color: var(--texto); background: var(--fundo); border: 1px solid var(--borda); border-radius: 8px; padding: 8px 10px; }
 textarea { resize: vertical; min-height: 220px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+#ed-site { min-height: 84px; }
 input[type=number] { width: 6em; }
 .linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 10px; }
 .opcoes label { display: inline-flex; align-items: center; gap: 6px; }

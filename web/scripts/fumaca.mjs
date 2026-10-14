@@ -125,7 +125,7 @@ try {
   // Rastreio curto do próprio site (2 páginas).
   await avaliar(`(() => { const c = document.getElementById('cb-filtro'); c.value = 'Todas'; c.dispatchEvent(new Event('change'));
     document.querySelector('[data-aba=rastreio]').click();
-    document.getElementById('ed-site').value = 'https://example.com/'; document.getElementById('sp-paginas').value = '5';
+    document.getElementById('ed-site').value = 'https://example.com/\\nhttps://example.org/'; document.getElementById('sp-paginas').value = '5';
     document.getElementById('ck-externos').checked = true; document.getElementById('bt-validar').click(); })()`);
   ok(await aguardar("!document.getElementById('bt-validar').disabled && document.querySelectorAll('#tabela tbody tr').length >= 2", 60000),
     "rastreio curto concluído (example.com + o link externo dele)");

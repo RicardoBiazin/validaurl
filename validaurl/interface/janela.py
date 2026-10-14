@@ -131,10 +131,11 @@ class JanelaPrincipal(QMainWindow):
         # Rastreio
         w = QWidget()
         form = QFormLayout(w)
-        self.ed_site = QLineEdit()
-        self.ed_site.setPlaceholderText("https://www.seusite.com.br/")
-        self.ed_site.returnPressed.connect(self.iniciar)
-        form.addRow("Site:", self.ed_site)
+        self.ed_site = QPlainTextEdit()
+        self.ed_site.setPlaceholderText("https://www.seusite.com.br/\nhttps://outro.com.br/")
+        self.ed_site.setToolTip("Um endereço por linha. Cada um é checado e tem os links internos seguidos.")
+        self.ed_site.setMaximumHeight(90)
+        form.addRow("Sites:", self.ed_site)
         self.sp_paginas = QSpinBox()
         self.sp_paginas.setRange(1, 100000)
         self.sp_paginas.setValue(500)
@@ -313,7 +314,7 @@ class JanelaPrincipal(QMainWindow):
             self.ck_redirect.setChecked(c.value("seguir", "true") == "true")
             self.ck_ssl.setChecked(c.value("ssl", "true") == "true")
             self.ck_get.setChecked(c.value("so_get", "false") == "true")
-            self.ed_site.setText(c.value("site", ""))
+            self.ed_site.setPlainText(c.value("site", ""))
             self.ed_sitemap.setText(c.value("sitemap", ""))
             # A lista da última sessão volta sozinha (não se perde ao fechar).
             self.txt_lista.setPlainText(c.value("lista", "") or "")
@@ -334,7 +335,7 @@ class JanelaPrincipal(QMainWindow):
         c.setValue("seguir", "true" if self.ck_redirect.isChecked() else "false")
         c.setValue("ssl", "true" if self.ck_ssl.isChecked() else "false")
         c.setValue("so_get", "true" if self.ck_get.isChecked() else "false")
-        c.setValue("site", self.ed_site.text())
+        c.setValue("site", self.ed_site.toPlainText())
         c.setValue("sitemap", self.ed_sitemap.text())
         c.setValue("lista", self.txt_lista.toPlainText()[:2_000_000])
         c.setValue("divisor", self.divisor.saveState())
@@ -530,17 +531,21 @@ class JanelaPrincipal(QMainWindow):
             self._alvo = urls[0] if len(urls) == 1 else f"lista de {len(urls)} URLs"
             self.lbl_fase.setText(f"{len(urls)} URLs")
         elif aba == ABA_RASTREIO:
-            site = _com_esquema(self.ed_site.text())
-            if url_valida(site):
-                QMessageBox.information(self, NOME, "Informe o endereço do site (http ou https).")
+            sites = [_com_esquema(x) for x in self.ed_site.toPlainText().splitlines() if x.strip()]
+            invalidos = [x for x in sites if url_valida(x)]
+            if not sites:
+                QMessageBox.information(self, NOME, "Informe pelo menos um endereço do site (http ou https).")
                 return
-            self.ed_site.setText(site)
+            if invalidos:
+                QMessageBox.information(self, NOME, f"Endereço inválido: {invalidos[0]}")
+                return
+            self.ed_site.setPlainText("\n".join(sites))
             self.modelo.limpar()
             opc = OpcoesRastreio(max_paginas=self.sp_paginas.value(), profundidade=self.sp_prof.value(),
                                  subdominios=self.ck_subdom.isChecked(), checar_externos=self.ck_externos.isChecked(),
                                  respeitar_robots=self.ck_robots.isChecked())
-            self.trabalho.rastreio(site, opcoes, opc)
-            self._alvo = site
+            self.trabalho.rastreio(sites, opcoes, opc)
+            self._alvo = sites[0] if len(sites) == 1 else f"{len(sites)} sites"
             self.lbl_fase.setText("Rastreando…")
         else:
             endereco = _com_esquema(self.ed_sitemap.text())

@@ -77,14 +77,14 @@ class Trabalho(QObject):
         self.fase.emit(f"{len(urls)} URLs no sitemap")
         self._lista(avisos, [(u, endereco) for u in urls], opcoes)
 
-    def rastreio(self, inicio: str, opcoes: Opcoes, opc: OpcoesRastreio):
-        self._iniciar(self._rastreio, inicio, opcoes, opc)
+    def rastreio(self, inicios: list[str], opcoes: Opcoes, opc: OpcoesRastreio):
+        self._iniciar(self._rastreio, inicios, opcoes, opc)
 
-    def _rastreio(self, avisos, inicio, opcoes, opc):
+    def _rastreio(self, avisos, inicios, opcoes, opc):
         def progresso(p):
             self.total = p.agendados
             self.paginas = p.paginas
 
         self.total = 1
-        rastrear(inicio, opcoes, opc, ao_resultado=self.fila.append, ao_progresso=progresso,
+        rastrear(inicios, opcoes, opc, ao_resultado=self.fila.append, ao_progresso=progresso,
                  cancelar=self.cancelar, avisos=avisos)

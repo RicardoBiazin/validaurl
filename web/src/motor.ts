@@ -150,18 +150,24 @@ export interface Progresso {
   paginas: number;
 }
 
-export async function rastrear(inicioBruto: string, op: OpcoesRastreio, aoResultado: (r: Resultado) => void,
+export async function rastrear(inicios: string[], op: OpcoesRastreio, aoResultado: (r: Resultado) => void,
   aoProgresso: (p: Progresso) => void, avisos: string[], sinal?: AbortSignal): Promise<void> {
-  const inicio = semFragmento(inicioBruto);
-  let regras: { permitir: string[]; bloquear: string[] } | null = null;
-  if (op.robots) {
-    try {
-      regras = (await api<RespPagina>("/api/pagina", { url: inicio, modo: "robots" }, sinal)).robots ?? null;
-    } catch (e) {
-      if ((e as Error).name === "AbortError") return;
-      if (e instanceof ErroApi && e.status === 403) throw e;
+  // Um ou vários endereços de partida. O robots.txt é buscado por domínio, na hora de abrir a página.
+  const raizes = [...new Set(inicios.map(semFragmento))];
+  const regrasCache = new Map<string, Promise<{ permitir: string[]; bloquear: string[] } | null>>();
+  const regrasDe = (url: string) => {
+    const origem = new URL(url).origin;
+    if (!regrasCache.has(origem)) {
+      regrasCache.set(origem, api<RespPagina>("/api/pagina", { url: origem + "/", modo: "robots" }, sinal)
+        .then((r) => r.robots ?? null, (e) => {
+          if (e instanceof ErroApi && e.status === 403) throw e;
+          return null;
+        }));
     }
-  }
+    return regrasCache.get(origem)!;
+  };
+  const permitido = async (url: string) =>
+    !op.robots || robotsPermite((await regrasDe(url)) ?? { permitir: [], bloquear: [] }, url);
   const vistos = new Set<string>();
   const paginas: { url: string; prof: number; origem: string }[] = [];
   const links: { url: string; encontradoEm: string }[] = [];
@@ -173,10 +179,10 @@ export async function rastrear(inicioBruto: string, op: OpcoesRastreio, aoResult
   const agendar = (url: string, prof: number, origem: string) => {
     const k = normalizar(url);
     if (vistos.has(k)) return;
-    const interno = mesmoSite(url, inicio, op.subdominios);
+    const interno = raizes.some((r) => mesmoSite(url, r, op.subdominios));
     if (!interno && !op.externos) return;
     vistos.add(k);
-    if (interno && !ehRecurso(url) && prof <= op.profundidade && (!regras || robotsPermite(regras, url))) {
+    if (interno && !ehRecurso(url) && prof <= op.profundidade) {
       if (nPaginas < op.maxPaginas) {
         nPaginas++;
         paginas.push({ url, prof, origem });
@@ -190,18 +196,29 @@ export async function rastrear(inicioBruto: string, op: OpcoesRastreio, aoResult
     links.push({ url, encontradoEm: origem });
   };
 
-  agendar(inicio, 0, "");
+  for (const raiz of raizes) agendar(raiz, 0, "");
   const umaPagina = async (p: { url: string; prof: number; origem: string }) => {
     try {
+      if (!(await permitido(p.url))) {
+        // robots.txt proíbe abrir esta página: ela é só checada, sem seguir os links dela.
+        await validarLista([{ url: p.url, encontradoEm: p.origem }], op, (r) => {
+          concluidos++;
+          aoResultado(r);
+        }, sinal);
+        progresso();
+        return;
+      }
       const r = await api<RespPagina>("/api/pagina",
         { url: p.url, modo: "html", seguirRedirects: op.seguirRedirects }, sinal);
       concluidos++;
       aoResultado(paraResultado(r.checagem, p.origem, op.seguirRedirects));
       const final = r.checagem.urlFinal || p.url;
-      if (p.url === inicio && !mesmoSite(final, inicio)) {
+      if (raizes.includes(p.url) && !mesmoSite(final, p.url)) {
         avisos.push(avisoRedirecionamentoFora(new URL(final).hostname));
       }
-      if (mesmoSite(final, inicio, op.subdominios)) for (const l of r.links ?? []) agendar(l, p.prof + 1, final);
+      if (raizes.some((raiz) => mesmoSite(final, raiz, op.subdominios))) {
+        for (const l of r.links ?? []) agendar(l, p.prof + 1, final);
+      }
     } catch (e) {
       if ((e as Error).name === "AbortError") return;
       if (e instanceof ErroApi && e.status === 403) throw e;

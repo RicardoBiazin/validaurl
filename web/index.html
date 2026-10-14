@@ -35,8 +35,8 @@
     </section>
 
     <section class="painel" data-painel="rastreio" hidden>
-      <label for="ed-site" class="rotulo">Site</label>
-      <input id="ed-site" type="url" placeholder="https://www.seusite.com.br/" autocomplete="url">
+      <label for="ed-site" class="rotulo">Sites (um endereço por linha: cada um é checado e tem os links internos seguidos)</label>
+      <textarea id="ed-site" rows="3" spellcheck="false" placeholder="https://www.seusite.com.br/&#10;https://outro.com.br/"></textarea>
       <div class="linha opcoes">
         <label>Máx. páginas <input id="sp-paginas" type="number" min="1" max="1000" value="200"></label>
         <label>Profundidade <input id="sp-prof" type="number" min="0" max="50" value="10"></label>
