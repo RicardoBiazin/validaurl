@@ -91,6 +91,13 @@ class TesteJanela(unittest.TestCase):
         m = self.j.modelo
         self.assertEqual(m.data(m.index(0, COL_TIPO)), "HTML")
         self.assertIn("text/html", m.data(m.index(0, COL_TIPO), Qt.ToolTipRole))
+        # Filtro por tipo: a lista traz só os tipos que apareceram e o filtro esconde o resto.
+        self.assertGreaterEqual(self.j.cb_tipo.findText("HTML"), 0)
+        self.assertEqual(self.j.cb_tipo.findText("PDF"), -1, "PDF não apareceu nesta lista")
+        self.j.cb_tipo.setCurrentText("HTML")
+        self.assertEqual(self.j.filtro.rowCount(), 1)
+        self.j.cb_tipo.setCurrentText("Todos os tipos")
+        self.assertEqual(self.j.filtro.rowCount(), 1)
 
     def test_exportar_so_visiveis(self):
         self.j.txt_lista.setPlainText(f"{self.srv.url('/ok')}\n{self.srv.url('/nada')}")

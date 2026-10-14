@@ -84,16 +84,35 @@ $<HTMLInputElement>("arquivo").addEventListener("change", async (ev) => {
 // ------------------------------------------------------------ tabela
 const cbFiltro = $<HTMLSelectElement>("cb-filtro");
 for (const t of [FILTRO_TODAS, FILTRO_PROBLEMAS, ...TODAS]) cbFiltro.add(new Option(t, t));
+const SEM_TIPO = "(sem tipo)";
+const TODOS_TIPOS = "Todos os tipos";
+const cbTipo = $<HTMLSelectElement>("cb-tipo");
+cbTipo.add(new Option(TODOS_TIPOS, TODOS_TIPOS));
 const edBusca = $<HTMLInputElement>("ed-busca");
 cbFiltro.addEventListener("change", agendarRender);
+cbTipo.addEventListener("change", agendarRender);
 edBusca.addEventListener("input", agendarRender);
+
+/** A lista do filtro de tipo traz só os tipos que já apareceram; a escolha atual é mantida. */
+function atualizarOpcoesTipo() {
+  const tipos = [...new Set(resultados.map((r) => rotuloTipo(r.tipo) || SEM_TIPO))]
+    .sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const opcoes = [TODOS_TIPOS, ...tipos];
+  const atuais = [...cbTipo.options].map((o) => o.value);
+  if (opcoes.length === atuais.length && opcoes.every((v, i) => v === atuais[i])) return;
+  const escolha = cbTipo.value;
+  cbTipo.replaceChildren(...opcoes.map((t) => new Option(t, t)));
+  cbTipo.value = opcoes.includes(escolha) ? escolha : TODOS_TIPOS;
+}
 
 function visiveis(): Resultado[] {
   const cat = cbFiltro.value;
+  const tipo = cbTipo.value;
   const busca = edBusca.value.trim().toLowerCase();
   let lista = resultados.filter((r) => {
     if (cat === FILTRO_PROBLEMAS && !ehProblema(r.categoria)) return false;
     if (cat !== FILTRO_TODAS && cat !== FILTRO_PROBLEMAS && r.categoria !== cat) return false;
+    if (tipo !== TODOS_TIPOS && (rotuloTipo(r.tipo) || SEM_TIPO) !== tipo) return false;
     if (busca) return [r.url, r.urlFinal, r.erro, r.encontradoEm, String(r.status ?? "")].join(" ").toLowerCase().includes(busca);
     return true;
   });
@@ -139,6 +158,7 @@ function tipoCelula(r: Resultado): HTMLTableCellElement {
 
 function render() {
   pendenteRender = false;
+  atualizarOpcoesTipo();
   const corpo = document.querySelector("#tabela tbody")!;
   const lista = visiveis();
   const fragmento = document.createDocumentFragment();

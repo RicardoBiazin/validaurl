@@ -14,6 +14,8 @@ COL_URL, COL_STATUS, COL_CATEGORIA, COL_TIPO, COL_FINAL, COL_REDIRECTS, COL_TEMP
 
 FILTRO_TODAS = "Todas"
 FILTRO_PROBLEMAS = "Só problemas"
+FILTRO_TIPO_TODOS = "Todos os tipos"
+SEM_TIPO = "(sem tipo)"
 
 
 class ModeloResultados(QAbstractTableModel):
@@ -127,18 +129,26 @@ class ModeloResultados(QAbstractTableModel):
         return ""
 
 
+def tipo_de(r: Resultado) -> str:
+    """Nome do tipo que o filtro e a coluna mostram (SEM_TIPO se o servidor não informou)."""
+    return rotulo_tipo(r.tipo) or SEM_TIPO
+
+
 class FiltroResultados(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.categoria = FILTRO_TODAS
+        self.tipo = FILTRO_TIPO_TODOS
         self.texto = ""
         self.setSortRole(Qt.UserRole)
 
-    def definir(self, categoria: str | None = None, texto: str | None = None):
+    def definir(self, categoria: str | None = None, texto: str | None = None, tipo: str | None = None):
         if categoria is not None:
             self.categoria = categoria
         if texto is not None:
             self.texto = texto.strip().lower()
+        if tipo is not None:
+            self.tipo = tipo
         self.invalidateFilter()
 
     def filterAcceptsRow(self, linha, pai):
@@ -146,6 +156,8 @@ class FiltroResultados(QSortFilterProxyModel):
         if self.categoria == FILTRO_PROBLEMAS and not eh_problema(r.categoria):
             return False
         if self.categoria not in (FILTRO_TODAS, FILTRO_PROBLEMAS) and r.categoria != self.categoria:
+            return False
+        if self.tipo != FILTRO_TIPO_TODOS and tipo_de(r) != self.tipo:
             return False
         if self.texto:
             alvo = " ".join((r.url, r.url_final, r.erro, r.encontrado_em, str(r.status or ""))).lower()

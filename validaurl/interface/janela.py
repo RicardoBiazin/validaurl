@@ -26,8 +26,8 @@ from ..rastreador import OpcoesRastreio
 from ..verificador import Opcoes, url_valida
 from .modelo import (
     COL_CATEGORIA, COL_ERRO, COL_FINAL, COL_ORIGEM, COL_REDIRECTS, COL_STATUS, COL_TEMPO, COL_TIPO, COL_URL,
-    FILTRO_PROBLEMAS, FILTRO_TODAS,
-    FiltroResultados, ModeloResultados,
+    FILTRO_PROBLEMAS, FILTRO_TIPO_TODOS, FILTRO_TODAS,
+    FiltroResultados, ModeloResultados, tipo_de,
 )
 from .dialogo_avisos import DialogoAvisos
 from .trabalho import Trabalho
@@ -247,6 +247,12 @@ class JanelaPrincipal(QMainWindow):
         self.cb_filtro.addItems([FILTRO_TODAS, FILTRO_PROBLEMAS, *TODAS])
         self.cb_filtro.currentTextChanged.connect(lambda t: (self.filtro.definir(categoria=t), self._resumo()))
         linha.addWidget(self.cb_filtro)
+        linha.addWidget(QLabel("Tipo:"))
+        self.cb_tipo = QComboBox()
+        self.cb_tipo.addItem(FILTRO_TIPO_TODOS)
+        self.cb_tipo.setToolTip("Mostra só as linhas de um tipo de arquivo (HTML, PDF, imagem...)")
+        self.cb_tipo.currentTextChanged.connect(lambda t: (self.filtro.definir(tipo=t), self._resumo()))
+        linha.addWidget(self.cb_tipo)
         self.ed_busca = QLineEdit()
         self.ed_busca.setPlaceholderText("Buscar…")
         self.ed_busca.setClearButtonEnabled(True)
@@ -557,6 +563,7 @@ class JanelaPrincipal(QMainWindow):
             self.trabalho.sitemap(endereco, opcoes)
             self._alvo = endereco
         self._salvar_config()
+        self._atualizar_tipos()
         self._rechecando = False
         self._proxima = None
         self.relogio_monitor.stop()
@@ -631,7 +638,23 @@ class JanelaPrincipal(QMainWindow):
         elif avisos:
             QMessageBox.information(self, NOME, "\n".join(avisos))
 
+    def _atualizar_tipos(self):
+        """A lista do filtro de tipo traz só os tipos que já apareceram; a escolha atual é mantida."""
+        tipos = sorted({tipo_de(r) for r in self.modelo.resultados}, key=str.lower)
+        opcoes = [FILTRO_TIPO_TODOS, *tipos]
+        atuais = [self.cb_tipo.itemText(i) for i in range(self.cb_tipo.count())]
+        if opcoes == atuais:
+            return
+        escolha = self.cb_tipo.currentText()
+        self.cb_tipo.blockSignals(True)
+        self.cb_tipo.clear()
+        self.cb_tipo.addItems(opcoes)
+        self.cb_tipo.setCurrentText(escolha if escolha in opcoes else FILTRO_TIPO_TODOS)
+        self.cb_tipo.blockSignals(False)
+        self.filtro.definir(tipo=self.cb_tipo.currentText())
+
     def _resumo(self):
+        self._atualizar_tipos()
         c = self.modelo.contagem()
         partes = [f"{k}: {v}" for k, v in c.items() if v]
         visiveis = self.filtro.rowCount()
