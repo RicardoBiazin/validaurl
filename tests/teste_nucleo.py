@@ -205,6 +205,19 @@ class TesteRastreio(unittest.TestCase):
         self.assertEqual(len(res), len({r.url for r in res}))
         self.assertFalse(any(u.startswith("mailto") or "javascript" in u for u in por_url))
 
+    def test_inicio_redireciona_para_fora(self):
+        # A página inicial sai do site: não há links para seguir, e o programa avisa o porquê.
+        with Servidor() as srv:
+            avisos = []
+            rastrear(srv.url("/para-fora"), Opcoes(timeout=2), OpcoesRastreio(checar_externos=False), avisos=avisos)
+        self.assertEqual(len(avisos), 1)
+        self.assertIn("redireciona para localhost", avisos[0])
+        self.assertIn("aba Lista de URLs", avisos[0])
+        with Servidor() as srv:
+            avisos = []
+            rastrear(srv.url("/ok"), Opcoes(timeout=2), OpcoesRastreio(respeitar_robots=False), avisos=avisos)
+        self.assertEqual(avisos, [], "sem redirect para fora, nenhum aviso")
+
     def test_limites(self):
         with Servidor() as srv:
             res = rastrear(srv.url("/site/"), Opcoes(timeout=3),

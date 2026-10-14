@@ -11,6 +11,12 @@ export const LOTE = 10;
 export const LOTES_SIMULTANEOS = 3;
 export const PAGINAS_SIMULTANEAS = 3;
 
+/** Mesmo texto do desktop (validaurl/rastreador.py). */
+export function avisoRedirecionamentoFora(host: string): string {
+  return `A página inicial redireciona para ${host}, fora do site informado. O rastreio só segue links ` +
+    "dentro do site, então não havia o que seguir. Para checar subdomínios, cole os endereços na aba Lista de URLs.";
+}
+
 export class ErroApi extends Error {
   status: number;
   constructor(msg: string, status: number) {
@@ -192,6 +198,9 @@ export async function rastrear(inicioBruto: string, op: OpcoesRastreio, aoResult
       concluidos++;
       aoResultado(paraResultado(r.checagem, p.origem, op.seguirRedirects));
       const final = r.checagem.urlFinal || p.url;
+      if (p.url === inicio && !mesmoSite(final, inicio)) {
+        avisos.push(avisoRedirecionamentoFora(new URL(final).hostname));
+      }
       if (mesmoSite(final, inicio, op.subdominios)) for (const l of r.links ?? []) agendar(l, p.prof + 1, final);
     } catch (e) {
       if ((e as Error).name === "AbortError") return;

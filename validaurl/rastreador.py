@@ -139,4 +139,13 @@ def rastrear(
                         agendar(link, prof + 1, pagina)
                 if ao_progresso:
                     ao_progresso(Progresso(len(resultados), contagem["agendados"], contagem["paginas"]))
+    inicial = next((r for r in resultados if r.url == inicio), None)
+    if inicial and inicial.url_final and not mesmo_site(inicial.url_final, inicio):
+        avisos.append(aviso_redirecionamento_fora(urlsplit(inicial.url_final).hostname or inicial.url_final))
     return resultados
+
+
+def aviso_redirecionamento_fora(host: str) -> str:
+    return (f"A página inicial redireciona para {host}, fora do site informado. O rastreio só segue links "
+            "dentro do site, então não havia o que seguir. Para checar subdomínios, cole os endereços "
+            "na aba Lista de URLs.")

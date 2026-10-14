@@ -57,6 +57,9 @@ class Manipulador(BaseHTTPRequestHandler):
             return self._enviar(200, _html("ok"))
         if p == "/redir":
             return self._redir(301, "/ok")
+        if p == "/para-fora":
+            # Outro nome de host (localhost): para o rastreio, é outro site.
+            return self._redir(302, f"http://localhost:{self.server.server_address[1]}/ok")
         if p == "/redir2":
             return self._redir(302, f"{base}/redir")
         if p == "/redir-404":
