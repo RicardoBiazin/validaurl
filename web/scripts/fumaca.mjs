@@ -129,7 +129,7 @@ try {
     document.getElementById('ck-externos').checked = true; document.getElementById('bt-validar').click(); })()`);
   ok(await aguardar("!document.getElementById('bt-validar').disabled && document.querySelectorAll('#tabela tbody tr').length >= 2", 60000),
     "rastreio curto concluído (example.com + o link externo dele)");
-  const origem = await avaliar("[...document.querySelectorAll('#tabela tbody tr')].map(tr => tr.cells[7].textContent).filter(Boolean)");
+  const origem = await avaliar("[...document.querySelectorAll('#tabela tbody tr')].map(tr => tr.cells[8].textContent).filter(Boolean)");
   ok(origem.includes("https://example.com/"), "coluna 'Encontrado em' preenchida");
 
   await avaliar("document.querySelector('[data-aba=monitores]').click()");

@@ -25,7 +25,8 @@ from ..exportar import exportar
 from ..rastreador import OpcoesRastreio
 from ..verificador import Opcoes, url_valida
 from .modelo import (
-    COL_CATEGORIA, COL_ERRO, COL_FINAL, COL_ORIGEM, COL_URL, FILTRO_PROBLEMAS, FILTRO_TODAS,
+    COL_CATEGORIA, COL_ERRO, COL_FINAL, COL_ORIGEM, COL_REDIRECTS, COL_STATUS, COL_TEMPO, COL_TIPO, COL_URL,
+    FILTRO_PROBLEMAS, FILTRO_TODAS,
     FiltroResultados, ModeloResultados,
 )
 from .dialogo_avisos import DialogoAvisos
@@ -262,8 +263,8 @@ class JanelaPrincipal(QMainWindow):
         self.tabela.verticalHeader().setDefaultSectionSize(22)
         cab = self.tabela.horizontalHeader()
         cab.setSectionResizeMode(QHeaderView.Interactive)
-        for col, larg in ((COL_URL, 380), (1, 60), (COL_CATEGORIA, 140), (COL_FINAL, 220), (4, 70), (5, 80),
-                          (COL_ERRO, 200), (COL_ORIGEM, 260)):
+        for col, larg in ((COL_URL, 380), (COL_STATUS, 60), (COL_CATEGORIA, 140), (COL_TIPO, 150), (COL_FINAL, 220),
+                          (COL_REDIRECTS, 70), (COL_TEMPO, 80), (COL_ERRO, 200), (COL_ORIGEM, 260)):
             self.tabela.setColumnWidth(col, larg)
         cab.setStretchLastSection(True)
         self.tabela.doubleClicked.connect(self._abrir_no_navegador)

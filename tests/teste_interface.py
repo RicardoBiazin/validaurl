@@ -82,6 +82,15 @@ class TesteJanela(unittest.TestCase):
         self.assertEqual(len(m.resultados), 4)  # substituiu, não duplicou
         self.assertTrue(self.j.bt_exportar.isEnabled())
 
+    def test_coluna_tipo(self):
+        from validaurl.interface.modelo import COL_TIPO, COLUNAS
+        self.assertEqual(COLUNAS[COL_TIPO], "Tipo")
+        self.j.txt_lista.setPlainText(self.srv.url("/ok"))
+        self.j.iniciar()
+        self.assertTrue(self.j.esperar())
+        m = self.j.modelo
+        self.assertEqual(m.data(m.index(0, COL_TIPO)), "text/html")
+
     def test_exportar_so_visiveis(self):
         self.j.txt_lista.setPlainText(f"{self.srv.url('/ok')}\n{self.srv.url('/nada')}")
         self.j.iniciar()

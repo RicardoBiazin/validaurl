@@ -9,8 +9,8 @@ from ..classificar import CORES, eh_problema
 from ..links import normalizar
 from ..verificador import Resultado
 
-COLUNAS = ["URL", "Status", "Categoria", "URL final", "Redirects", "Tempo (ms)", "Erro", "Encontrado em"]
-COL_URL, COL_STATUS, COL_CATEGORIA, COL_FINAL, COL_REDIRECTS, COL_TEMPO, COL_ERRO, COL_ORIGEM = range(8)
+COLUNAS = ["URL", "Status", "Categoria", "Tipo", "URL final", "Redirects", "Tempo (ms)", "Erro", "Encontrado em"]
+COL_URL, COL_STATUS, COL_CATEGORIA, COL_TIPO, COL_FINAL, COL_REDIRECTS, COL_TEMPO, COL_ERRO, COL_ORIGEM = range(9)
 
 FILTRO_TODAS = "Todas"
 FILTRO_PROBLEMAS = "Só problemas"
@@ -110,6 +110,8 @@ class ModeloResultados(QAbstractTableModel):
             return "" if r.status is None else str(r.status)
         if col == COL_CATEGORIA:
             return r.categoria
+        if col == COL_TIPO:
+            return r.tipo
         if col == COL_FINAL:
             return r.url_final if r.url_final and r.url_final != r.url else ""
         if col == COL_REDIRECTS:

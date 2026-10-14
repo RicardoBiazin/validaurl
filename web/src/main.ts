@@ -140,7 +140,7 @@ function render() {
     tr.className = CLASSE_CSS[r.categoria] ?? "";
     const redir = celulaTexto(r.redirects.length ? String(r.redirects.length) : "", "num");
     if (r.redirects.length) redir.title = r.redirects.map((x) => `${x.status} ${x.url}`).join("\n") + `\n→ ${r.status} ${r.urlFinal}`;
-    tr.append(celulaLink(r.url), celulaTexto(r.status === null ? "" : String(r.status), "num"), celulaTexto(r.categoria),
+    tr.append(celulaLink(r.url), celulaTexto(r.status === null ? "" : String(r.status), "num"), celulaTexto(r.categoria), celulaTexto(r.tipo),
       celulaLink(r.urlFinal && r.urlFinal !== r.url ? r.urlFinal : ""), redir, celulaTexto(String(r.tempoMs), "num"),
       celulaTexto(r.erro), celulaLink(r.encontradoEm));
     fragmento.append(tr);

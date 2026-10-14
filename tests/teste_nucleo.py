@@ -254,7 +254,8 @@ class TesteExportar(unittest.TestCase):
             for ext in ("csv", "xlsx", "json"):
                 exportar(res, Path(d) / f"r.{ext}")
             csv_txt = (Path(d) / "r.csv").read_text(encoding="utf-8-sig")
-            self.assertTrue(csv_txt.startswith("URL;Status;Categoria"))
+            self.assertTrue(csv_txt.startswith("URL;Status;Categoria;Tipo;"))
+            self.assertIn(";text/html;", csv_txt, "o tipo do arquivo entra no CSV")
             self.assertIn("302 ", csv_txt)
             dados = json.loads((Path(d) / "r.json").read_text(encoding="utf-8"))
             self.assertEqual(len(dados["resultados"]), 3)
@@ -263,6 +264,7 @@ class TesteExportar(unittest.TestCase):
             ws = wb.active
             self.assertEqual(ws.max_row, 4)
             self.assertEqual(ws["C4"].value, C.ERRO_CLIENTE)
+            self.assertEqual(ws["D2"].value, "text/html", "coluna Tipo na planilha")
             wb.close()
 
 

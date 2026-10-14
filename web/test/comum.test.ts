@@ -71,7 +71,7 @@ test("planilha .xlsx lida no navegador (textos e hyperlinks)", () => {
 test("CSV com BOM, ';' e sem fórmula injetada", () => {
   const csv = paraCsv([{ url: "=HYPERLINK(\"http://mal\")", status: 404, categoria: "Erro 4xx", urlFinal: "", redirects: [],
     tempoMs: 3, erro: "Not; Found", tipo: "", metodo: "GET", encontradoEm: "" }]);
-  assert.ok(csv.startsWith("﻿URL;Status"));
+  assert.ok(csv.startsWith("﻿URL;Status;Categoria;Tipo;"));
   assert.match(csv, /\n"'=HYPERLINK\(""http:\/\/mal""\)";404/);
   assert.match(csv, /"Not; Found"/);
 });

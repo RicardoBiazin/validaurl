@@ -10,7 +10,7 @@ from . import VERSAO
 from .classificar import CORES
 from .verificador import Resultado
 
-COLUNAS = ["URL", "Status", "Categoria", "URL final", "Redirects", "Tempo (ms)", "Erro", "Encontrado em"]
+COLUNAS = ["URL", "Status", "Categoria", "Tipo", "URL final", "Redirects", "Tempo (ms)", "Erro", "Encontrado em"]
 
 
 def linha(r: Resultado) -> list:
@@ -18,6 +18,7 @@ def linha(r: Resultado) -> list:
         r.url,
         r.status if r.status is not None else "",
         r.categoria,
+        r.tipo,
         r.url_final if r.url_final and r.url_final != r.url else "",
         " → ".join(f"{s} {u}" for s, u in r.redirects),
         r.tempo_ms,
@@ -57,7 +58,7 @@ def para_xlsx(resultados: list[Resultado], caminho: str | Path) -> None:
         if cor:
             for c in aba[aba.max_row]:
                 c.fill = cor
-    for letra, largura in zip("ABCDEFGH", (60, 8, 20, 50, 40, 11, 40, 50)):
+    for letra, largura in zip("ABCDEFGHI", (60, 8, 20, 24, 50, 40, 11, 40, 50)):
         aba.column_dimensions[letra].width = largura
     aba.freeze_panes = "A2"
     aba.auto_filter.ref = aba.dimensions

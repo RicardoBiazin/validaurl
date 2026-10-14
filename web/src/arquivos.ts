@@ -34,7 +34,7 @@ export async function urlsDoArquivo(arquivo: File): Promise<string[]> {
   return urlsDoTexto(texto);
 }
 
-const COLUNAS = ["URL", "Status", "Categoria", "URL final", "Redirects", "Tempo (ms)", "Erro", "Encontrado em"];
+const COLUNAS = ["URL", "Status", "Categoria", "Tipo", "URL final", "Redirects", "Tempo (ms)", "Erro", "Encontrado em"];
 
 function celula(v: unknown): string {
   let s = String(v ?? "");
@@ -46,7 +46,7 @@ function celula(v: unknown): string {
 export function paraCsv(resultados: Resultado[]): string {
   const linhas = [COLUNAS.join(";")];
   for (const r of resultados) {
-    linhas.push([r.url, r.status ?? "", r.categoria, r.urlFinal && r.urlFinal !== r.url ? r.urlFinal : "",
+    linhas.push([r.url, r.status ?? "", r.categoria, r.tipo, r.urlFinal && r.urlFinal !== r.url ? r.urlFinal : "",
       r.redirects.map((x) => `${x.status} ${x.url}`).join(" → "), r.tempoMs, r.erro, r.encontradoEm].map(celula).join(";"));
   }
   return "﻿" + linhas.join("\r\n");
