@@ -29,7 +29,11 @@ declare const Netlify: { env: { get(nome: string): string | undefined } };
 const DOMINIO_OFICIAL = "validaurl.biazin.com.br";
 const DOMINIO_ANTIGO = "validaurl.netlify.app";
 
-const LIVRES = /^\/(robots\.txt|favicon\.ico|manifest\.webmanifest|icons\/[\w.-]+)$/;
+const LIVRES = /^\/(robots\.txt|sitemap\.xml|favicon\.ico|favicon\.svg|manifest\.webmanifest|icons\/[\w.-]+)$/;
+
+// Landing de apresentacao (indexavel): so' estes arquivos estaticos, sem dar
+// acesso ao app nem as Functions.
+const SOBRE = /^\/sobre(\/|\/index\.html|\/sobre\.css)?$/;
 
 const CSP_PORTAO = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; "
   + "base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
@@ -69,10 +73,19 @@ export default async function portao(req: Request, context: Contexto): Promise<R
     return Response.redirect(`https://${DOMINIO_OFICIAL}${caminho}${url.search}`, 301);
   }
 
-  // Livres: o robots.txt (Disallow: /) precisa chegar a quem o respeita; o
+  // Livres: o robots.txt e o sitemap.xml precisam chegar aos robos; o
   // icone e o manifesto sao pedidos pelo navegador SEM cookie (o manifesto vai
   // em modo CORS sem credenciais) e nao dao acesso a nada.
   if (LIVRES.test(caminho)) return context.next();
+
+  // /sobre/ e' a unica parte indexavel: tira o "noindex" que o netlify.toml
+  // poe em tudo (/*).
+  if (SOBRE.test(caminho)) {
+    const r = await context.next();
+    const cab = new Headers(r.headers);
+    cab.set("X-Robots-Tag", "index, follow");
+    return new Response(r.body, { status: r.status, statusText: r.statusText, headers: cab });
+  }
 
   const segredo = Netlify.env.get("PORTAO_SEGREDO") ?? "";
   if (segredo.length < 16) {

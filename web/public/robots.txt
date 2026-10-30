@@ -1,2 +1,5 @@
 User-agent: *
+Allow: /sobre/
 Disallow: /
+
+Sitemap: https://validaurl.biazin.com.br/sitemap.xml

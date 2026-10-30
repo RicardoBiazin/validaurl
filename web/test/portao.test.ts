@@ -147,6 +147,22 @@ test("Edge Function: desafio, verificação, cookie e passagem", { timeout: 60_0
   c = contexto();
   await portao(new Request("https://site.exemplo/icons/../assets/x.js"), c.ctx);
   assert.equal(c.chamou(), false, "sem escapar pela lista de livres");
+  // 4b. Landing /sobre/ e sitemap passam sem cookie (indexaveis); /sobre/ perde o noindex.
+  const GOOGLEBOT = { "user-agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)", accept: "text/html" };
+  for (const livre of ["/sobre/", "/sobre", "/sobre/index.html", "/sobre/sobre.css", "/sitemap.xml"]) {
+    c = contexto();
+    r = await portao(new Request("https://site.exemplo" + livre, { headers: GOOGLEBOT }), c.ctx);
+    assert.equal(c.chamou(), true, livre);
+    assert.equal(r.status, 200, livre);
+  }
+  r = await portao(new Request("https://site.exemplo/sobre/", { headers: GOOGLEBOT }), contexto().ctx);
+  assert.equal(r.headers.get("x-robots-tag"), "index, follow");
+  // O app, as Functions e caminhos parecidos continuam barrados para o robo.
+  for (const barrado of ["/", "/index.html", "/api/checar", "/sobre/../api/checar", "/sobre/x.js", "/sobrex", "/sitemap.xml.gz"]) {
+    c = contexto();
+    await portao(new Request("https://site.exemplo" + barrado, { headers: GOOGLEBOT }), c.ctx);
+    assert.equal(c.chamou(), false, barrado);
+  }
   // 5. Nonce errado: 403, sem cookie.
   const post = (nonce: string, origem = "https://site.exemplo") => new Request("https://site.exemplo/__portao/verificar", {
     method: "POST", headers: { "user-agent": UA, "content-type": "application/json", origin: origem },

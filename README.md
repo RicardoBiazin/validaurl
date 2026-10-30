@@ -90,7 +90,11 @@ Os monitores ficam no Netlify Blobs e rodam mesmo com o navegador fechado. Não 
   - o IP é conferido **na conexão**, o que também barra DNS rebinding, e de novo a cada redirect;
   - ficam bloqueadas as redes privadas, loopback, link-local, metadados de nuvem e as faixas reservadas.
 - O corpo das páginas nunca volta ao navegador, só o status e os links. O HTML é lido até 2 MB.
-- `noindex`, `robots.txt` com `Disallow: /` e CSP restrita.
+- `noindex`, `robots.txt` com `Disallow: /` (exceto `/sobre/`) e CSP restrita.
+
+### Página de apresentação (`/sobre/`)
+
+https://validaurl.biazin.com.br/sobre/ é uma landing estática (`web/public/sobre/`) e a única parte indexável do site. O portão deixa passar sem cookie só `/sobre/`, `/robots.txt` e `/sitemap.xml`, e troca o `X-Robots-Tag` de `/sobre/` para `index, follow`. O app (`/`) e as Functions (`/api/*`) continuam atrás do portão. O `sitemap.xml` lista só `/sobre/`.
 
 ### Variáveis no Netlify
 

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificar links quebrados online grátis · ValidaURL</title>
+<meta name="description" content="Verifique links quebrados online e grátis: o ValidaURL confere listas de URLs, rastreia sites, lê sitemaps, consulta WHOIS e avisa quando um link falhar.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://validaurl.biazin.com.br/sobre/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/sobre/sobre.css">
+<meta name="theme-color" content="#1f6feb">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="ValidaURL">
+<meta property="og:title" content="Verificar links quebrados online grátis · ValidaURL">
+<meta property="og:description" content="Confira listas de URLs, rastreie sites e sitemaps e receba aviso quando um link quebrar. Grátis, no navegador ou no Windows.">
+<meta property="og:url" content="https://validaurl.biazin.com.br/sobre/">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "ValidaURL",
+      "url": "https://validaurl.biazin.com.br/",
+      "description": "Ferramenta grátis para verificar links quebrados: confere listas de URLs, rastreia sites, lê sitemaps, consulta WHOIS e monitora links com avisos.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web, Windows",
+      "inLanguage": "pt-BR",
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+      "author": { "@type": "Person", "name": "Ricardo Biazin", "url": "https://biazin.com.br/" },
+      "license": "https://opensource.org/licenses/MIT",
+      "sameAs": ["https://github.com/RicardoBiazin/validaurl", "https://biazin.com.br/ferramentas/validaurl/"]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "O ValidaURL é grátis?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Sim. A versão web e a versão para Windows são gratuitas e o código é aberto, com licença MIT." }
+        },
+        {
+          "@type": "Question",
+          "name": "Como o ValidaURL decide se um link está quebrado?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ele manda um HEAD e, se o HEAD falhar ou responder 400 ou mais, repete com GET. Segue a cadeia de redirects, detecta loops e classifica cada URL como OK, redirecionado, erro 4xx, erro 5xx ou falha (DNS, timeout, SSL, conexão recusada)." }
+        },
+        {
+          "@type": "Question",
+          "name": "Dá para verificar um site inteiro?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Sim. O rastreio segue os links internos e checa tudo o que encontrar, inclusive imagens, CSS e JS, e mostra em qual página está cada link quebrado. Também é possível ler o sitemap, inclusive sitemap index e .xml.gz." }
+        },
+        {
+          "@type": "Question",
+          "name": "O ValidaURL avisa quando um link cair?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Sim. Os monitores repetem a checagem a cada intervalo escolhido, a partir de 5 minutos, e avisam por webhook ou notificação do navegador quando um link passa a falhar ou volta ao normal. Na web eles rodam no servidor, mesmo com o navegador fechado." }
+        },
+        {
+          "@type": "Question",
+          "name": "Preciso criar conta?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Não. Não há login. Cada monitor recebe um link secreto, e o servidor guarda só o hash da chave." }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="/sobre/"><img src="/favicon.svg" alt="" width="32" height="32"> ValidaURL</a>
+</header>
+<main>
+  <section class="abertura">
+    <h1>Verificar links quebrados online, grátis</h1>
+    <p class="chamada">O ValidaURL confere se cada link responde <strong>OK (200)</strong>. Cole uma lista de URLs, rastreie um site inteiro ou leia o sitemap e veja na hora quais endereços dão erro 404, 500, redirect ou não respondem.</p>
+    <p><a class="botao" href="/">Abrir o ValidaURL</a></p>
+  </section>
+
+  <section>
+    <h2>Como funciona</h2>
+    <p>Cada URL recebe primeiro um pedido HEAD. Se o HEAD falhar ou responder 400 ou mais, a checagem repete com GET, porque muitos servidores tratam o HEAD errado. A cadeia de redirects é seguida e registrada, com detecção de loop.</p>
+    <p>Na versão web, as checagens são feitas pelo servidor, porque o navegador não consegue consultar sites de terceiros por causa do CORS. O servidor devolve só o código de status e os links encontrados, nunca o conteúdo das páginas, e bloqueia endereços de redes privadas.</p>
+    <p>Há também uma versão para Windows, portátil e sem instalação, com os mesmos recursos e linha de comando.</p>
+  </section>
+
+  <section>
+    <h2>Recursos</h2>
+    <ul class="recursos">
+      <li><strong>Lista de URLs</strong>: cole o texto ou abra um arquivo TXT, CSV, XLSX ou HTML.</li>
+      <li><strong>Rastrear site</strong>: segue os links internos e checa imagens, CSS e JS; mostra em qual página está o link quebrado.</li>
+      <li><strong>Sitemap</strong>: aceita sitemap index e .xml.gz; acha o sitemap pelo robots.txt.</li>
+      <li><strong>WHOIS</strong>: registrador, datas, DNS (A, AAAA, MX, NS, TXT), reverso dos IPs e mapa.</li>
+      <li><strong>Monitoramento</strong>: avisa quando um link passa a falhar ou volta ao normal.</li>
+      <li><strong>Exportação</strong>: filtre por resultado ou tipo de arquivo e baixe em CSV.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Perguntas frequentes</h2>
+    <details><summary>O ValidaURL é grátis?</summary><p>Sim. A versão web e a versão para Windows são gratuitas e o código é aberto, com licença MIT.</p></details>
+    <details><summary>Como o ValidaURL decide se um link está quebrado?</summary><p>Ele manda um HEAD e, se o HEAD falhar ou responder 400 ou mais, repete com GET. Segue a cadeia de redirects, detecta loops e classifica cada URL como OK, redirecionado, erro 4xx, erro 5xx ou falha (DNS, timeout, SSL, conexão recusada).</p></details>
+    <details><summary>Dá para verificar um site inteiro?</summary><p>Sim. O rastreio segue os links internos e checa tudo o que encontrar, inclusive imagens, CSS e JS, e mostra em qual página está cada link quebrado. Também é possível ler o sitemap, inclusive sitemap index e .xml.gz.</p></details>
+    <details><summary>O ValidaURL avisa quando um link cair?</summary><p>Sim. Os monitores repetem a checagem a cada intervalo escolhido, a partir de 5 minutos, e avisam por webhook ou notificação do navegador quando um link passa a falhar ou volta ao normal. Na web eles rodam no servidor, mesmo com o navegador fechado.</p></details>
+    <details><summary>Preciso criar conta?</summary><p>Não. Não há login. Cada monitor recebe um link secreto, e o servidor guarda só o hash da chave.</p></details>
+  </section>
+
+  <section class="fim">
+    <p><a class="botao" href="/">Abrir o ValidaURL</a></p>
+    <p class="links"><a href="https://biazin.com.br/ferramentas/validaurl/">Página da ferramenta em biazin.com.br</a> · <a href="https://github.com/RicardoBiazin/validaurl">Código no GitHub</a> · <a href="https://github.com/RicardoBiazin/validaurl/releases">Baixar para Windows</a></p>
+  </section>
+</main>
+<footer class="rodape">ValidaURL · <a href="https://biazin.com.br/">Ricardo Biazin</a> · licença MIT</footer>
+</body>
+</html>
