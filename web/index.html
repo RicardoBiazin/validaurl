@@ -23,6 +23,7 @@
 
   <main>
     <section class="painel" data-painel="lista">
+      <p class="descricao">Confere uma lista de endereços, um por linha, ou de um arquivo TXT, CSV, XLSX ou HTML. Cada endereço é checado só por ele mesmo, sem seguir os links da página.</p>
       <label for="txt-lista" class="rotulo">Cole as URLs (uma por linha, ou texto livre com links)</label>
       <textarea id="txt-lista" rows="12" spellcheck="false" placeholder="https://www.exemplo.com.br/&#10;https://www.exemplo.com.br/contato"></textarea>
       <div class="linha">
@@ -35,6 +36,7 @@
     </section>
 
     <section class="painel" data-painel="rastreio" hidden>
+      <p class="descricao">Parte de um ou mais endereços (um por linha) e segue os links internos de cada site. Checa todas as páginas e links encontrados, com as opções abaixo.</p>
       <label for="ed-site" class="rotulo">Sites (um endereço por linha: cada um é checado e tem os links internos seguidos)</label>
       <textarea id="ed-site" rows="3" spellcheck="false" placeholder="https://www.seusite.com.br/&#10;https://outro.com.br/"></textarea>
       <div class="linha opcoes">
@@ -47,11 +49,13 @@
     </section>
 
     <section class="painel" data-painel="sitemap" hidden>
+      <p class="descricao">Lê o sitemap.xml do site e checa todas as URLs dele. Informe o endereço do sitemap ou só o endereço do site.</p>
       <label for="ed-sitemap" class="rotulo">Sitemap (ou só o site: procura no robots.txt e em /sitemap.xml)</label>
       <input id="ed-sitemap" type="url" placeholder="https://www.seusite.com.br/sitemap.xml">
     </section>
 
     <section class="painel" data-painel="monitores" hidden>
+      <p class="descricao">Checagem automática no servidor a cada X minutos, mesmo com o navegador fechado. Avisa por e-mail, webhook ou notificação quando um link quebra ou volta ao normal.</p>
       <div id="monitores"></div>
     </section>
 

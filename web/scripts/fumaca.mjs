@@ -103,6 +103,7 @@ try {
   // O portão (se houver) resolve a prova de trabalho e recarrega sozinho.
   ok(await aguardar("!!document.getElementById('versao')?.textContent", 60000), "app carregou (portão resolvido, se houver)");
   ok(await avaliar("document.getElementById('versao').textContent") === versao, `versão ${versao} na tela`);
+  ok(await avaliar("document.querySelectorAll('.descricao').length === 4"), "descrição em cada uma das 4 abas");
 
   const urls = ["https://www.google.com/", "https://www.google.com/nao-existe-validaurl-" + Date.now()];
   await avaliar(`(() => { const t = document.getElementById('txt-lista'); t.value = ${JSON.stringify(urls.join("\n"))};

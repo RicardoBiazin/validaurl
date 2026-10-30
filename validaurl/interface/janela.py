@@ -36,6 +36,14 @@ ABA_LISTA, ABA_RASTREIO, ABA_SITEMAP = range(3)
 FILTRO_ARQUIVOS = "Listas de URLs (*.txt *.csv *.tsv *.xlsx *.xlsm *.html *.htm);;Todos os arquivos (*)"
 
 
+def _descricao(texto: str) -> QLabel:
+    """Linha de explicação no topo de cada aba: quebra de linha e cor discreta."""
+    lbl = QLabel(texto)
+    lbl.setWordWrap(True)
+    lbl.setStyleSheet("color: palette(mid); padding-bottom: 4px;")
+    return lbl
+
+
 class _RetornoAvisos(QObject):
     erros = Signal(list)
 
@@ -107,6 +115,8 @@ class JanelaPrincipal(QMainWindow):
         # Lista
         w = QWidget()
         lay = QVBoxLayout(w)
+        lay.addWidget(_descricao("Confere uma lista de endereços, um por linha, ou de um arquivo TXT, CSV, XLSX ou HTML. "
+                                 "Cada endereço é checado só por ele mesmo, sem seguir os links da página."))
         self.txt_lista = QPlainTextEdit()
         self.txt_lista.setPlaceholderText("Cole aqui as URLs (uma por linha, ou texto livre com links)…")
         self.txt_lista.textChanged.connect(self._contar_lista)
@@ -131,6 +141,8 @@ class JanelaPrincipal(QMainWindow):
         # Rastreio
         w = QWidget()
         form = QFormLayout(w)
+        form.addRow(_descricao("Parte de um ou mais endereços (um por linha) e segue os links internos de cada site. "
+                               "Checa todas as páginas e links encontrados, com as opções abaixo."))
         self.ed_site = QPlainTextEdit()
         self.ed_site.setPlaceholderText("https://www.seusite.com.br/\nhttps://outro.com.br/")
         self.ed_site.setToolTip("Um endereço por linha. Cada um é checado e tem os links internos seguidos.")
@@ -164,6 +176,8 @@ class JanelaPrincipal(QMainWindow):
         # Sitemap
         w = QWidget()
         form = QFormLayout(w)
+        form.addRow(_descricao("Lê o sitemap.xml do site e checa todas as URLs dele. "
+                               "Informe o endereço do sitemap ou só o endereço do site."))
         self.ed_sitemap = QLineEdit()
         self.ed_sitemap.setPlaceholderText("https://www.seusite.com.br/sitemap.xml  (ou só o site)")
         self.ed_sitemap.returnPressed.connect(self.iniciar)

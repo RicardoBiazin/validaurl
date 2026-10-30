@@ -11,7 +11,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from PySide6.QtCore import Qt, QSettings  # noqa: E402
-from PySide6.QtWidgets import QApplication, QMessageBox  # noqa: E402
+from PySide6.QtWidgets import QApplication, QLabel, QMessageBox  # noqa: E402
 
 from servidor_teste import Manipulador, Servidor  # noqa: E402
 
@@ -81,6 +81,13 @@ class TesteJanela(unittest.TestCase):
         self.assertTrue(self.j.esperar())
         self.assertEqual(len(m.resultados), 4)  # substituiu, não duplicou
         self.assertTrue(self.j.bt_exportar.isEnabled())
+
+    def test_descricao_em_cada_aba(self):
+        # Cada aba explica o que faz logo no topo.
+        self.assertEqual(self.j.abas.count(), 3)
+        for i in range(self.j.abas.count()):
+            textos = [lbl.text() for lbl in self.j.abas.widget(i).findChildren(QLabel)]
+            self.assertTrue(any(len(t) > 60 for t in textos), f"aba {self.j.abas.tabText(i)} sem descrição")
 
     def test_coluna_tipo(self):
         from validaurl.interface.modelo import COL_TIPO, COLUNAS
