@@ -5,6 +5,7 @@ import { comEsquema, urlsDoTexto } from "./comum/entradas.ts";
 import { normalizar } from "./comum/links.ts";
 import { ErroApi, rastrear, urlsDoSitemap, validarLista } from "./motor.ts";
 import { iniciarMonitores } from "./monitores.ts";
+import { consultarWhois, iniciarWhois } from "./whois.ts";
 
 declare const __VERSAO__: string;
 
@@ -29,7 +30,7 @@ function trocarAba(aba: string) {
     b.setAttribute("aria-selected", String(b.dataset.aba === aba));
   }
   for (const p of document.querySelectorAll<HTMLElement>(".painel")) p.hidden = p.dataset.painel !== aba;
-  $("area-checagem").hidden = aba === "monitores";
+  $("area-checagem").hidden = aba === "monitores" || aba === "whois";
   try {
     localStorage.setItem("vu_aba", aba);
   } catch { /* sem armazenamento: tudo bem */ }
@@ -270,6 +271,7 @@ function opcoes() {
 }
 
 function validar() {
+  if (abaAtual === "whois") return void consultarWhois();
   if (controle) return;
   if (abaAtual === "lista") {
     const urls = urlsDoTexto(txtLista.value);
@@ -348,6 +350,7 @@ document.addEventListener("keydown", (e) => {
 
 // ------------------------------------------------------------ início
 iniciarMonitores($("monitores"), () => trocarAba("monitores"));
+iniciarWhois();
 let abaSalva = "lista";
 try {
   abaSalva = localStorage.getItem("vu_aba") ?? "lista";

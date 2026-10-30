@@ -47,6 +47,11 @@ textarea, input[type=url], input[type=text], input[type=email], input[type=searc
 textarea { resize: vertical; min-height: 220px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
 #ed-site { min-height: 84px; }
 .descricao { color: var(--discreto); margin: 0 0 12px; font-size: 14px; }
+.whois-resultado { min-height: 120px; background: var(--cartao); border: 1px solid var(--borda); border-radius: 12px; padding: 12px 16px; margin-top: 10px; }
+.whois-resultado h3 { margin: 0 0 6px; }
+.whois-resultado h4 { margin: 14px 0 4px; font-size: 15px; }
+.whois-resultado ul { margin: 0; padding-left: 20px; }
+#mapa { height: 320px; margin-top: 10px; border: 1px solid var(--borda); border-radius: 12px; overflow: hidden; }
 input[type=number] { width: 6em; }
 .linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 10px; }
 .opcoes label { display: inline-flex; align-items: center; gap: 6px; }

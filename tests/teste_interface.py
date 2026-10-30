@@ -84,10 +84,30 @@ class TesteJanela(unittest.TestCase):
 
     def test_descricao_em_cada_aba(self):
         # Cada aba explica o que faz logo no topo.
-        self.assertEqual(self.j.abas.count(), 3)
+        self.assertEqual(self.j.abas.count(), 4)
         for i in range(self.j.abas.count()):
             textos = [lbl.text() for lbl in self.j.abas.widget(i).findChildren(QLabel)]
             self.assertTrue(any(len(t) > 60 for t in textos), f"aba {self.j.abas.tabText(i)} sem descrição")
+
+    def test_whois_mostra_resultado_e_escapa(self):
+        from validaurl.whois import Relatorio
+        rel = Relatorio("ip", "8.8.8.8",
+                        ip={"nome": "GOOGLE", "pais": "US", "faixa": "8.8.8.0 – 8.8.8.255", "organizacao": "Google LLC"},
+                        enderecos=[{"ip": "8.8.8.8", "ptr": "dns.google",
+                                    "geo": {"country": "Brasil", "regionName": "SP", "city": "São Paulo",
+                                            "lat": -23.5, "lon": -46.6, "isp": "X", "as": "AS1"}}],
+                        avisos=["<script>alerta()</script>"])
+        self.j._mostrar_whois(rel, "")
+        self.assertEqual(self.j.cb_ip_whois.count(), 1)
+        self.assertTrue(self.j.bt_mapa_whois.isEnabled())
+        texto = self.j.txt_whois.toPlainText()
+        self.assertIn("São Paulo", texto)
+        self.assertIn("Google LLC", texto)
+        self.assertIn("<script>alerta()</script>", texto, "texto vindo da rede aparece como texto")
+        self.assertNotIn("<script>", self.j.txt_whois.toHtml().lower())
+        self.j._mostrar_whois(None, "timeout")
+        self.assertIn("timeout", self.j.txt_whois.toPlainText())
+        self.assertTrue(self.j.bt_whois.isEnabled())
 
     def test_coluna_tipo(self):
         from validaurl.interface.modelo import COL_TIPO, COLUNAS

@@ -5,6 +5,9 @@ Confere se links respondem **OK (200)**. Há uma versão **desktop** (Windows, P
 - **Lista de URLs**: cole o texto ou abra um arquivo TXT, CSV, XLSX ou HTML. A lista pode ser salva em arquivo, e o programa a grava sozinho enquanto você digita: ela volta na próxima vez, mesmo que o Windows desligue com ele aberto.
 - **Rastrear site**: segue os links internos e checa tudo o que encontrar, inclusive imagens, CSS e JS. A coluna *Encontrado em* mostra em qual página está o link quebrado.
 - **Sitemap**: aceita sitemap index e `.xml.gz`. Se você informar só o site, ele procura o sitemap no `robots.txt` e em `/sitemap.xml`.
+- **WHOIS**: para um domínio (ex.: `exemplo.com.br`) ou um IP, mostra o registrador, as datas de criação e vencimento, os servidores DNS, os registros A/AAAA/MX/NS/TXT e o reverso (PTR) de cada IP. Para um IP, mostra a rede que o possui (RDAP). A localização de cada IP (país, cidade, provedor e coordenadas) vem do [ip-api.com](https://ip-api.com), que recebe o IP consultado. O desktop abre o mapa no navegador (OpenStreetMap); a web mostra o mapa na própria página.
+  - Consultas: RDAP em `rdap.org`, DNS por HTTPS na Cloudflare (`cloudflare-dns.com`) e `ip-api.com`. Nada além disso.
+  - Limite do ip-api.com no plano gratuito: 45 consultas por minuto, uso não comercial.
 - **Monitoramento**: repete a checagem a cada X minutos e avisa quando um link **passa a falhar** ou **volta ao normal**, por e-mail, webhook ou notificação.
 
 Cada URL é checada assim:

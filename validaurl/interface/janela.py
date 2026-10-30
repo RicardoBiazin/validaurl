@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import html
 import json
 import os
 import threading
@@ -14,7 +15,8 @@ from PySide6.QtGui import QAction, QDesktopServices, QGuiApplication, QIcon, QKe
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QCheckBox, QComboBox, QDoubleSpinBox, QFileDialog, QFormLayout, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QMainWindow, QMenu, QMessageBox, QPlainTextEdit, QProgressBar,
-    QPushButton, QSpinBox, QSplitter, QStyle, QSystemTrayIcon, QTableView, QTabWidget, QVBoxLayout, QWidget,
+    QPushButton, QSpinBox, QSplitter, QStyle, QSystemTrayIcon, QTableView, QTabWidget, QTextBrowser, QVBoxLayout,
+    QWidget,
 )
 
 from .. import NOME, VERSAO, segredos
@@ -24,6 +26,7 @@ from ..entradas import urls_do_arquivo, urls_do_texto
 from ..exportar import exportar
 from ..rastreador import OpcoesRastreio
 from ..verificador import Opcoes, url_valida
+from ..whois import classificar_alvo, consultar
 from .modelo import (
     COL_CATEGORIA, COL_ERRO, COL_FINAL, COL_ORIGEM, COL_REDIRECTS, COL_STATUS, COL_TEMPO, COL_TIPO, COL_URL,
     FILTRO_PROBLEMAS, FILTRO_TIPO_TODOS, FILTRO_TODAS,
@@ -32,7 +35,7 @@ from .modelo import (
 from .dialogo_avisos import DialogoAvisos
 from .trabalho import Trabalho
 
-ABA_LISTA, ABA_RASTREIO, ABA_SITEMAP = range(3)
+ABA_LISTA, ABA_RASTREIO, ABA_SITEMAP, ABA_WHOIS = range(4)
 FILTRO_ARQUIVOS = "Listas de URLs (*.txt *.csv *.tsv *.xlsx *.xlsm *.html *.htm);;Todos os arquivos (*)"
 
 
@@ -46,6 +49,51 @@ def _descricao(texto: str) -> QLabel:
 
 class _RetornoAvisos(QObject):
     erros = Signal(list)
+
+
+class _RetornoWhois(QObject):
+    pronto = Signal(object, str)  # relatório (ou None), erro ("" se ok)
+
+
+def _html_whois(rel) -> str:
+    """Relatório WHOIS em HTML. Todo valor vindo da rede passa por html.escape."""
+    e = html.escape
+    partes = [f"<h3>{e(rel.alvo)}</h3>"]
+    if rel.dominio:
+        d = rel.dominio
+        partes.append("<b>Registro (WHOIS/RDAP)</b><ul>")
+        for rotulo, valor in (("Registrador", d["registrador"]), ("Criado em", d["criado"]),
+                              ("Expira em", d["expira"]), ("Última alteração", d["atualizado"]),
+                              ("Status", "; ".join(d["status"]))):
+            partes.append(f"<li>{rotulo}: {e(valor or '—')}</li>")
+        partes.append(f"<li>Servidores DNS: {e(', '.join(d['nameservers']) or '—')}</li></ul>")
+    if rel.ip:
+        i = rel.ip
+        partes.append("<b>Rede (RDAP)</b><ul>"
+                      f"<li>Nome: {e(i['nome'] or '—')}</li>"
+                      f"<li>Organização: {e(i['organizacao'] or '—')}</li>"
+                      f"<li>País: {e(i['pais'] or '—')}</li>"
+                      f"<li>Faixa: {e(i['faixa'] or '—')}</li></ul>")
+    if rel.dns:
+        partes.append("<b>Registros DNS</b><ul>")
+        for tipo, valores in rel.dns.items():
+            partes.append(f"<li>{tipo}: {e(', '.join(valores) or '—')}</li>")
+        partes.append("</ul>")
+    partes.append("<b>Endereços e localização</b><ul>")
+    for end in rel.enderecos:
+        geo = end.get("geo")
+        ptr = f" → {e(end['ptr'])}" if end.get("ptr") else ""
+        if geo:
+            onde = ", ".join(x for x in (geo.get("city"), geo.get("regionName"), geo.get("country")) if x)
+            linha = f"<li>{e(end['ip'])}{ptr} — {e(onde or '—')}"
+            linha += f"<br>ISP: {e(geo.get('isp') or '—')} · AS: {e(geo.get('as') or '—')}</li>"
+        else:
+            linha = f"<li>{e(end['ip'])}{ptr} — sem dados de localização</li>"
+        partes.append(linha)
+    partes.append("</ul>")
+    for aviso in rel.avisos:
+        partes.append(f"<p><i>{e(aviso)}</i></p>")
+    return "".join(partes)
 
 
 def _com_esquema(texto: str) -> str:
@@ -79,6 +127,8 @@ class JanelaPrincipal(QMainWindow):
         self._saindo = False
         self._retorno_avisos = _RetornoAvisos(self)
         self._retorno_avisos.erros.connect(self._erros_avisos)
+        self._retorno_whois = _RetornoWhois(self)
+        self._retorno_whois.pronto.connect(self._mostrar_whois)
         self.relogio_monitor = QTimer(self)
         self.relogio_monitor.setInterval(1000)
         self.relogio_monitor.timeout.connect(self._tique_monitor)
@@ -185,6 +235,7 @@ class JanelaPrincipal(QMainWindow):
         form.addRow(QLabel("Aceita sitemap index e .xml.gz. Só com o endereço do site, procura no robots.txt "
                            "e em /sitemap.xml."))
         self.abas.addTab(w, "Sitemap")
+        self.abas.addTab(self._aba_whois(), "WHOIS")
 
         # Tudo daqui para baixo fica na parte de baixo do divisor.
         baixo = QWidget()
@@ -512,6 +563,97 @@ class JanelaPrincipal(QMainWindow):
         self.txt_lista.setPlainText("\n".join(urls))
         self.abas.setCurrentIndex(ABA_LISTA)
 
+    # ------------------------------------------------------------------ WHOIS
+    def _aba_whois(self) -> QWidget:
+        self._enderecos_whois: list[dict] = []
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.addWidget(_descricao("Mostra quem registrou o domínio, até quando vence, os servidores DNS, os IPs "
+                                 "e onde ficam os servidores no mapa. Aceita um domínio (exemplo.com.br) ou um IP."))
+        linha = QHBoxLayout()
+        self.ed_whois = QLineEdit()
+        self.ed_whois.setPlaceholderText("exemplo.com.br  ou  8.8.8.8")
+        self.ed_whois.returnPressed.connect(self.consultar_whois)
+        linha.addWidget(self.ed_whois, 1)
+        self.bt_whois = QPushButton("Consultar")
+        self.bt_whois.clicked.connect(self.consultar_whois)
+        linha.addWidget(self.bt_whois)
+        lay.addLayout(linha)
+        self.txt_whois = QTextBrowser()
+        self.txt_whois.setOpenExternalLinks(False)
+        lay.addWidget(self.txt_whois, 1)
+        linha = QHBoxLayout()
+        linha.addWidget(QLabel("Endereço no mapa:"))
+        self.cb_ip_whois = QComboBox()
+        self.cb_ip_whois.setMinimumWidth(240)
+        self.cb_ip_whois.currentIndexChanged.connect(self._atualizar_mapa_whois)
+        linha.addWidget(self.cb_ip_whois, 1)
+        self.lbl_coord_whois = QLabel("")
+        linha.addWidget(self.lbl_coord_whois)
+        self.bt_mapa_whois = QPushButton("Abrir no mapa")
+        self.bt_mapa_whois.setEnabled(False)
+        self.bt_mapa_whois.clicked.connect(self._abrir_mapa_whois)
+        linha.addWidget(self.bt_mapa_whois)
+        lay.addLayout(linha)
+        return w
+
+    def consultar_whois(self):
+        texto = self.ed_whois.text()
+        try:
+            classificar_alvo(texto)
+        except ValueError as exc:
+            QMessageBox.information(self, NOME, str(exc))
+            return
+        self.bt_whois.setEnabled(False)
+        self.bt_whois.setText("Consultando…")
+        self.txt_whois.setPlainText("Consultando WHOIS, DNS e localização…")
+        threading.Thread(target=self._trabalho_whois, args=(texto.strip(),), daemon=True).start()
+
+    def _trabalho_whois(self, texto: str):
+        # Roda fora da janela: nada aqui toca em widget; o resultado volta pelo sinal.
+        try:
+            rel = consultar(texto)
+        except Exception as exc:  # noqa: BLE001
+            self._retorno_whois.pronto.emit(None, f"{exc.__class__.__name__}: {exc}")
+            return
+        self._retorno_whois.pronto.emit(rel, "")
+
+    def _mostrar_whois(self, rel, erro: str):
+        self.bt_whois.setEnabled(True)
+        self.bt_whois.setText("Consultar")
+        if rel is None:
+            self.txt_whois.setPlainText(f"Não consegui consultar: {erro}")
+            return
+        self.txt_whois.setHtml(_html_whois(rel))
+        self._enderecos_whois = rel.enderecos
+        self.cb_ip_whois.blockSignals(True)
+        self.cb_ip_whois.clear()
+        for i, end in enumerate(rel.enderecos):
+            geo = end.get("geo") or {}
+            onde = ", ".join(x for x in (geo.get("city"), geo.get("country")) if x)
+            self.cb_ip_whois.addItem(end["ip"] + (f" — {onde}" if onde else ""), i)
+        self.cb_ip_whois.blockSignals(False)
+        self._atualizar_mapa_whois()
+
+    def _geo_whois(self, indice: int) -> dict | None:
+        if 0 <= indice < len(self._enderecos_whois):
+            return self._enderecos_whois[indice].get("geo")
+        return None
+
+    def _atualizar_mapa_whois(self):
+        geo = self._geo_whois(self.cb_ip_whois.currentIndex())
+        ok = bool(geo and geo.get("lat") is not None and geo.get("lon") is not None)
+        self.bt_mapa_whois.setEnabled(ok)
+        self.lbl_coord_whois.setText(f"{geo['lat']:.4f}, {geo['lon']:.4f}" if ok else "sem localização")
+
+    def _abrir_mapa_whois(self):
+        geo = self._geo_whois(self.cb_ip_whois.currentIndex())
+        if not geo or geo.get("lat") is None:
+            return
+        lat, lon = float(geo["lat"]), float(geo["lon"])
+        QDesktopServices.openUrl(QUrl(
+            f"https://www.openstreetmap.org/?mlat={lat:.5f}&mlon={lon:.5f}#map=10/{lat:.5f}/{lon:.5f}"))
+
     def salvar_lista(self):
         urls = urls_do_texto(self.txt_lista.toPlainText())
         if not urls:
@@ -540,6 +682,9 @@ class JanelaPrincipal(QMainWindow):
         # Base de comparação para os avisos: na 1ª checagem, todo problema é novo.
         self._anteriores = list(self.modelo.resultados) if automatico else None
         aba = self.abas.currentIndex()
+        if aba == ABA_WHOIS:
+            self.consultar_whois()
+            return
         opcoes = self.opcoes()
         if aba == ABA_LISTA:
             urls = urls_do_texto(self.txt_lista.toPlainText())

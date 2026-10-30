@@ -103,7 +103,7 @@ try {
   // O portão (se houver) resolve a prova de trabalho e recarrega sozinho.
   ok(await aguardar("!!document.getElementById('versao')?.textContent", 60000), "app carregou (portão resolvido, se houver)");
   ok(await avaliar("document.getElementById('versao').textContent") === versao, `versão ${versao} na tela`);
-  ok(await avaliar("document.querySelectorAll('.descricao').length === 4"), "descrição em cada uma das 4 abas");
+  ok(await avaliar("document.querySelectorAll('.descricao').length === 5"), "descrição em cada uma das 5 abas");
 
   const urls = ["https://www.google.com/", "https://www.google.com/nao-existe-validaurl-" + Date.now()];
   await avaliar(`(() => { const t = document.getElementById('txt-lista'); t.value = ${JSON.stringify(urls.join("\n"))};
@@ -133,6 +133,10 @@ try {
   const origem = await avaliar("[...document.querySelectorAll('#tabela tbody tr')].map(tr => tr.cells[8].textContent).filter(Boolean)");
   ok(origem.includes("https://example.com/"), "coluna 'Encontrado em' preenchida");
 
+  // WHOIS: consulta de verdade (Function + RDAP/DNS/geolocalização) e o mapa Leaflet do cdnjs.
+  await avaliar("(() => { document.querySelector('[data-aba=whois]').click(); document.getElementById('ed-whois').value = '8.8.8.8'; document.getElementById('bt-whois').click(); })()");
+  ok(await aguardar("document.querySelector('#whois-resultado h3')?.textContent === '8.8.8.8'", 40000), "WHOIS de 8.8.8.8 renderizado");
+  ok(await aguardar("!document.getElementById('mapa').hidden && document.getElementById('mapa').classList.contains('leaflet-container')", 30000), "mapa com a localização do IP");
   await avaliar("document.querySelector('[data-aba=monitores]').click()");
   ok(await aguardar("[...document.querySelectorAll('#monitores button')].some(b => b.textContent === 'Novo monitor')", 10000),
     "aba Monitores abre");

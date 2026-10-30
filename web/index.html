@@ -17,6 +17,7 @@
       <button role="tab" data-aba="lista" aria-selected="true">Lista</button>
       <button role="tab" data-aba="rastreio">Rastrear site</button>
       <button role="tab" data-aba="sitemap">Sitemap</button>
+      <button role="tab" data-aba="whois">WHOIS</button>
       <button role="tab" data-aba="monitores">Monitores</button>
     </nav>
   </header>
@@ -54,6 +55,20 @@
       <input id="ed-sitemap" type="url" placeholder="https://www.seusite.com.br/sitemap.xml">
     </section>
 
+    <section class="painel" data-painel="whois" hidden>
+      <p class="descricao">Mostra quem registrou o domínio, até quando vence, os servidores DNS, os IPs e onde ficam os servidores no mapa. Aceita um domínio (exemplo.com.br) ou um IP.</p>
+      <div class="linha">
+        <input id="ed-whois" type="text" placeholder="exemplo.com.br  ou  8.8.8.8" autocomplete="off" spellcheck="false">
+        <button id="bt-whois" class="botao">Consultar</button>
+      </div>
+      <div id="whois-resultado" class="whois-resultado"></div>
+      <div class="linha">
+        <label>Endereço no mapa <select id="cb-ip-whois"></select></label>
+        <span id="lbl-coord-whois" class="discreto"></span>
+        <button id="bt-mapa-whois" class="botao secundario" disabled>Mostrar no mapa</button>
+      </div>
+      <div id="mapa" hidden></div>
+    </section>
     <section class="painel" data-painel="monitores" hidden>
       <p class="descricao">Checagem automática no servidor a cada X minutos, mesmo com o navegador fechado. Avisa por e-mail, webhook ou notificação quando um link quebra ou volta ao normal.</p>
       <div id="monitores"></div>
