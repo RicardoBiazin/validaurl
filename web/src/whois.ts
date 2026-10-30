@@ -98,6 +98,9 @@ async function mostrarNoMapa(lat: number, lon: number, rotulo: string) {
     mapa = L.map(div);
     L.tileLayer(TILES, {
       maxZoom: 19,
+      // O site manda Referrer-Policy: no-referrer; o OSM recusa tiles sem Referer (403).
+      // Só os tiles enviam a origem.
+      referrerPolicy: "strict-origin-when-cross-origin",
       attribution: '© <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a>',
     }).addTo(mapa);
     camada = L.layerGroup().addTo(mapa);

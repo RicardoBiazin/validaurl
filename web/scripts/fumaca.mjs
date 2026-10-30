@@ -137,6 +137,7 @@ try {
   await avaliar("(() => { document.querySelector('[data-aba=whois]').click(); document.getElementById('ed-whois').value = '8.8.8.8'; document.getElementById('bt-whois').click(); })()");
   ok(await aguardar("document.querySelector('#whois-resultado h3')?.textContent === '8.8.8.8'", 40000), "WHOIS de 8.8.8.8 renderizado");
   ok(await aguardar("!document.getElementById('mapa').hidden && document.getElementById('mapa').classList.contains('leaflet-container')", 30000), "mapa com a localização do IP");
+  ok(await aguardar("document.querySelectorAll('#mapa img.leaflet-tile-loaded').length > 0", 20000), "tiles do OpenStreetMap carregados (sem 403)");
   await avaliar("document.querySelector('[data-aba=monitores]').click()");
   ok(await aguardar("[...document.querySelectorAll('#monitores button')].some(b => b.textContent === 'Novo monitor')", 10000),
     "aba Monitores abre");
