@@ -76,6 +76,14 @@ export default async function portao(req: Request, context: Contexto): Promise<R
   // Livres: o robots.txt e o sitemap.xml precisam chegar aos robos; o
   // icone e o manifesto sao pedidos pelo navegador SEM cookie (o manifesto vai
   // em modo CORS sem credenciais) e nao dao acesso a nada.
+  // O robots.txt e o sitemap.xml saem SEM o "noindex" do netlify.toml: com ele
+  // o Search Console recusava o sitemap ("Erro de HTTP geral").
+  if (caminho === "/robots.txt" || caminho === "/sitemap.xml") {
+    const r = await context.next();
+    const cab = new Headers(r.headers);
+    cab.delete("X-Robots-Tag");
+    return new Response(r.body, { status: r.status, statusText: r.statusText, headers: cab });
+  }
   if (LIVRES.test(caminho)) return context.next();
 
   // /sobre/ e' a unica parte indexavel: tira o "noindex" que o netlify.toml

@@ -157,6 +157,13 @@ test("Edge Function: desafio, verificação, cookie e passagem", { timeout: 60_0
   }
   r = await portao(new Request("https://site.exemplo/sobre/", { headers: GOOGLEBOT }), contexto().ctx);
   assert.equal(r.headers.get("x-robots-tag"), "index, follow");
+  // robots.txt e sitemap.xml perdem o noindex do netlify.toml (o Search Console recusava o sitemap).
+  const comNoindex = { next: async () => new Response("<urlset/>", { status: 200, headers: { "X-Robots-Tag": "noindex, nofollow" } }) };
+  for (const arq of ["/robots.txt", "/sitemap.xml"]) {
+    r = await portao(new Request("https://site.exemplo" + arq, { headers: GOOGLEBOT }), comNoindex);
+    assert.equal(r.status, 200, arq);
+    assert.equal(r.headers.get("x-robots-tag"), null, arq);
+  }
   // O app, as Functions e caminhos parecidos continuam barrados para o robo.
   for (const barrado of ["/", "/index.html", "/api/checar", "/sobre/../api/checar", "/sobre/x.js", "/sobrex", "/sitemap.xml.gz"]) {
     c = contexto();
