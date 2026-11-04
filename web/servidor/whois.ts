@@ -10,7 +10,7 @@ import { isIP } from "node:net";
 import { ipBloqueado } from "./rede.ts";
 
 export const RE_DOMINIO = /^(?=.{4,253}$)(?!-)(?:[a-z0-9-]{1,63}\.)+[a-z]{2,63}$/;
-const URL_RDAP_DOMINIO = "https://rdap.org/domain/";
+export const URL_RDAP_DOMINIO = "https://rdap.org/domain/";
 const URL_RDAP_IP = "https://rdap.org/ip/";
 const URL_DOH = "https://cloudflare-dns.com/dns-query";
 const URL_GEO = "http://ip-api.com/json/";
@@ -155,7 +155,7 @@ export function resumoGeo(j: Json): Geo | null {
   };
 }
 
-async function buscarJson(url: string, headers: Record<string, string>, tempoMs: number):
+export async function buscarJson(url: string, headers: Record<string, string>, tempoMs: number):
   Promise<{ dados: Json | null; erro: string }> {
   try {
     const r = await fetch(url, {

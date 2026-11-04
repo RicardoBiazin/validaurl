@@ -6,6 +6,7 @@ import { normalizar } from "./comum/links.ts";
 import { ErroApi, rastrear, urlsDoSitemap, validarLista } from "./motor.ts";
 import { iniciarMonitores } from "./monitores.ts";
 import { consultarWhois, iniciarWhois } from "./whois.ts";
+import { iniciarDominios, verificarDominios } from "./dominios.ts";
 
 declare const __VERSAO__: string;
 
@@ -30,7 +31,7 @@ function trocarAba(aba: string) {
     b.setAttribute("aria-selected", String(b.dataset.aba === aba));
   }
   for (const p of document.querySelectorAll<HTMLElement>(".painel")) p.hidden = p.dataset.painel !== aba;
-  $("area-checagem").hidden = aba === "monitores" || aba === "whois";
+  $("area-checagem").hidden = aba === "monitores" || aba === "whois" || aba === "dominios";
   try {
     localStorage.setItem("vu_aba", aba);
   } catch { /* sem armazenamento: tudo bem */ }
@@ -272,6 +273,7 @@ function opcoes() {
 
 function validar() {
   if (abaAtual === "whois") return void consultarWhois();
+  if (abaAtual === "dominios") return void verificarDominios();
   if (controle) return;
   if (abaAtual === "lista") {
     const urls = urlsDoTexto(txtLista.value);
@@ -351,6 +353,7 @@ document.addEventListener("keydown", (e) => {
 // ------------------------------------------------------------ início
 iniciarMonitores($("monitores"), () => trocarAba("monitores"));
 iniciarWhois();
+iniciarDominios();
 let abaSalva = "lista";
 try {
   abaSalva = localStorage.getItem("vu_aba") ?? "lista";

@@ -32,10 +32,11 @@ from .modelo import (
     FILTRO_PROBLEMAS, FILTRO_TIPO_TODOS, FILTRO_TODAS,
     FiltroResultados, ModeloResultados, tipo_de,
 )
+from .aba_dominios import AbaDominios
 from .dialogo_avisos import DialogoAvisos
 from .trabalho import Trabalho
 
-ABA_LISTA, ABA_RASTREIO, ABA_SITEMAP, ABA_WHOIS = range(4)
+ABA_LISTA, ABA_RASTREIO, ABA_SITEMAP, ABA_WHOIS, ABA_DOMINIOS = range(5)
 FILTRO_ARQUIVOS = "Listas de URLs (*.txt *.csv *.tsv *.xlsx *.xlsm *.html *.htm);;Todos os arquivos (*)"
 
 
@@ -236,6 +237,8 @@ class JanelaPrincipal(QMainWindow):
                            "e em /sitemap.xml."))
         self.abas.addTab(w, "Sitemap")
         self.abas.addTab(self._aba_whois(), "WHOIS")
+        self.aba_dominios = AbaDominios(self.config, lambda: self.cfg_avisos, self._notificar_bandeja)
+        self.abas.addTab(self.aba_dominios, "Domínios")
 
         # Tudo daqui para baixo fica na parte de baixo do divisor.
         baixo = QWidget()
@@ -654,6 +657,13 @@ class JanelaPrincipal(QMainWindow):
         QDesktopServices.openUrl(QUrl(
             f"https://www.openstreetmap.org/?mlat={lat:.5f}&mlon={lon:.5f}#map=10/{lat:.5f}/{lon:.5f}"))
 
+    def _notificar_bandeja(self, titulo: str, texto: str):
+        """Aviso de vencimento: bandeja do Windows (se ligada) ou barra de status."""
+        if self.bandeja is not None and self.cfg_avisos.notificacao:
+            self.bandeja.showMessage(titulo, texto, QSystemTrayIcon.Warning, 15000)
+        else:
+            self.statusBar().showMessage(texto, 15000)
+
     def salvar_lista(self):
         urls = urls_do_texto(self.txt_lista.toPlainText())
         if not urls:
@@ -684,6 +694,9 @@ class JanelaPrincipal(QMainWindow):
         aba = self.abas.currentIndex()
         if aba == ABA_WHOIS:
             self.consultar_whois()
+            return
+        if aba == ABA_DOMINIOS:
+            self.aba_dominios.verificar_todos()
             return
         opcoes = self.opcoes()
         if aba == ABA_LISTA:

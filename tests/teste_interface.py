@@ -84,10 +84,30 @@ class TesteJanela(unittest.TestCase):
 
     def test_descricao_em_cada_aba(self):
         # Cada aba explica o que faz logo no topo.
-        self.assertEqual(self.j.abas.count(), 4)
+        self.assertEqual(self.j.abas.count(), 5)
         for i in range(self.j.abas.count()):
             textos = [lbl.text() for lbl in self.j.abas.widget(i).findChildren(QLabel)]
             self.assertTrue(any(len(t) > 60 for t in textos), f"aba {self.j.abas.tabText(i)} sem descrição")
+
+    def test_aba_dominios_tabela_e_aviso_so_na_piora(self):
+        from datetime import datetime, timedelta, timezone
+        aba = self.j.aba_dominios
+        aba._itens = [{"dominio": "vence.com.br", "expira": None, "registrador": "", "status": [], "erro": "",
+                       "verificado": "", "ultimo_aviso": ""}]
+        futuro = (datetime.now(timezone.utc) + timedelta(days=5)).isoformat()
+        resultados = [{"dominio": "vence.com.br", "expira": futuro, "registrador": "Registro X", "status": [],
+                       "erro": "", "verificado": "agora"}]
+        chamadas = []
+        aba._notificar = lambda titulo, texto: chamadas.append(texto)
+        aba._recebeu(resultados)
+        self.assertEqual(aba.tabela.rowCount(), 1)
+        self.assertEqual(aba.tabela.item(0, 0).text(), "vence.com.br")
+        self.assertEqual(aba.tabela.item(0, 3).text(), "Vence em breve")
+        self.assertEqual(aba.tabela.item(0, 4).text(), "Registro X")
+        self.assertEqual(len(chamadas), 1, "avisa quando entra em 15 dias")
+        aba._recebeu(resultados)
+        self.assertEqual(len(chamadas), 1, "mesma situação não repete o aviso")
+        self.assertIn("vence.com.br", self.j.config.value("dominios"), "lista fica salva nas configurações")
 
     def test_whois_mostra_resultado_e_escapa(self):
         from validaurl.whois import Relatorio

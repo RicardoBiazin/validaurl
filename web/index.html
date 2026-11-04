@@ -18,6 +18,7 @@
       <button role="tab" data-aba="rastreio">Rastrear site</button>
       <button role="tab" data-aba="sitemap">Sitemap</button>
       <button role="tab" data-aba="whois">WHOIS</button>
+      <button role="tab" data-aba="dominios">Domínios</button>
       <button role="tab" data-aba="monitores">Monitores</button>
     </nav>
   </header>
@@ -68,6 +69,18 @@
         <button id="bt-mapa-whois" class="botao secundario" disabled>Mostrar no mapa</button>
       </div>
       <div id="mapa" hidden></div>
+    </section>
+    <section class="painel" data-painel="dominios" hidden>
+      <p class="descricao">Acompanha a lista de domínios: quando cada um vence, há quantos dias, quem o registrou e onde registrar ou renovar. Avisa quando um vencimento se aproxima (15 dias ou menos) ou já passou. A lista fica neste navegador.</p>
+      <div class="linha">
+        <input id="ed-dominio" type="text" placeholder="exemplo.com.br" autocomplete="off" spellcheck="false">
+        <button id="bt-adicionar-dominio" class="botao">Adicionar</button>
+        <button id="bt-verificar-dominios" class="botao secundario">Verificar agora</button>
+        <button id="bt-avisar-navegador" class="botao secundario">Avisar no navegador</button>
+      </div>
+      <p id="dominios-aviso" class="discreto"></p>
+      <p id="dominios-vazio" class="discreto">Nenhum domínio na lista ainda.</p>
+      <ul id="lista-dominios" class="lista-dominios"></ul>
     </section>
     <section class="painel" data-painel="monitores" hidden>
       <p class="descricao">Checagem automática no servidor a cada X minutos, mesmo com o navegador fechado. Avisa por e-mail, webhook ou notificação quando um link quebra ou volta ao normal.</p>

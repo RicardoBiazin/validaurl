@@ -1,4 +1,4 @@
 """ValidaURL: confere se links respondem OK (200)."""
 
-VERSAO = "0.5.2"
+VERSAO = "0.6.0"
 NOME = "ValidaURL"

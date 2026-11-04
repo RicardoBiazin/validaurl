@@ -103,7 +103,7 @@ try {
   // O portão (se houver) resolve a prova de trabalho e recarrega sozinho.
   ok(await aguardar("!!document.getElementById('versao')?.textContent", 60000), "app carregou (portão resolvido, se houver)");
   ok(await avaliar("document.getElementById('versao').textContent") === versao, `versão ${versao} na tela`);
-  ok(await avaliar("document.querySelectorAll('.descricao').length === 5"), "descrição em cada uma das 5 abas");
+  ok(await avaliar("document.querySelectorAll('.descricao').length === 6"), "descrição em cada uma das 6 abas");
 
   const urls = ["https://www.google.com/", "https://www.google.com/nao-existe-validaurl-" + Date.now()];
   await avaliar(`(() => { const t = document.getElementById('txt-lista'); t.value = ${JSON.stringify(urls.join("\n"))};
@@ -138,6 +138,10 @@ try {
   ok(await aguardar("document.querySelector('#whois-resultado h3')?.textContent === '8.8.8.8'", 40000), "WHOIS de 8.8.8.8 renderizado");
   ok(await aguardar("!document.getElementById('mapa').hidden && document.getElementById('mapa').classList.contains('leaflet-container')", 30000), "mapa com a localização do IP");
   ok(await aguardar("document.querySelectorAll('#mapa img.leaflet-tile-loaded').length > 0", 20000), "tiles do OpenStreetMap carregados (sem 403)");
+  // Domínios: adiciona um domínio real e confere o cartão com o vencimento vindo do RDAP.
+  await avaliar("(() => { document.querySelector('[data-aba=dominios]').click(); document.getElementById('ed-dominio').value = 'example.com'; document.getElementById('bt-adicionar-dominio').click(); })()");
+  ok(await aguardar("[...document.querySelectorAll('.cartao-dominio strong')].some(s => s.textContent === 'example.com')", 20000), "domínio adicionado na aba Domínios");
+  ok(await aguardar("(document.querySelector('.cartao-dominio .discreto')?.textContent ?? '').startsWith('Vence em: ') && !document.querySelector('.cartao-dominio .discreto').textContent.includes('RDAP')", 40000), "vencimento de example.com consultado (RDAP)");
   await avaliar("document.querySelector('[data-aba=monitores]').click()");
   ok(await aguardar("[...document.querySelectorAll('#monitores button')].some(b => b.textContent === 'Novo monitor')", 10000),
     "aba Monitores abre");
