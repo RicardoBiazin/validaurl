@@ -139,7 +139,7 @@ test("Edge Function: desafio, verificação, cookie e passagem", { timeout: 60_0
   assert.equal(r.status, 200);
   assert.match(r.headers.get("content-type")!, /javascript/);
   // 4. robots.txt, icone e manifesto passam (o navegador os pede sem cookie).
-  for (const livre of ["/robots.txt", "/favicon.ico", "/manifest.webmanifest", "/icons/icone-192.png"]) {
+  for (const livre of ["/robots.txt", "/llms.txt", "/favicon.ico", "/manifest.webmanifest", "/icons/icone-192.png"]) {
     c = contexto();
     await portao(new Request("https://site.exemplo" + livre), c.ctx);
     assert.equal(c.chamou(), true, livre);

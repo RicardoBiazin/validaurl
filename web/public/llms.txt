@@ -1,0 +1,19 @@
+# ValidaURL
+
+> Verificador e monitor de links para Windows e navegador, de código aberto (MIT). Confere se os links respondem OK (200), rastreia um site seguindo os links internos ou lê o sitemap, e mostra em qual página está cada link quebrado. O monitoramento repete a checagem em intervalos e avisa por e-mail, webhook ou notificação quando um link para de funcionar ou volta ao normal. Criado por Ricardo Biazin (biazin.com.br).
+
+O aplicativo web é protegido contra robôs, então a descrição completa está na página de apresentação.
+
+## Apresentação
+
+- [ValidaURL: apresentação e recursos](https://validaurl.biazin.com.br/sobre/): o que o programa faz, requisitos e como baixar.
+
+## Downloads e código
+
+- [Versão para Windows](https://github.com/RicardoBiazin/validaurl/releases): ValidaURL.exe portátil, sem instalação.
+- [Código-fonte](https://github.com/RicardoBiazin/validaurl): licença MIT.
+- [Página da ferramenta em biazin.com.br](https://biazin.com.br/ferramentas/validaurl/): descrição, requisitos e perguntas frequentes.
+
+## Autor
+
+- Ricardo Biazin, RVJV Soluções Corporativas (Florianópolis/SC). [LinkedIn](https://www.linkedin.com/in/ricardo-biazin/). [Outras ferramentas gratuitas](https://biazin.com.br/).

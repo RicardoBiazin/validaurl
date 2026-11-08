@@ -1,5 +1,86 @@
+# Conteúdo público (apresentação em /sobre/, índice para IA em /llms.txt). O aplicativo fica fora dos buscadores e dos robôs.
+
 User-agent: *
 Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: GPTBot
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: OAI-SearchBot
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: ChatGPT-User
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: ClaudeBot
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: Claude-SearchBot
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: Claude-User
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: PerplexityBot
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: Perplexity-User
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: Google-Extended
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: Applebot-Extended
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: CCBot
+Allow: /sobre/
+Allow: /llms.txt
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: MistralAI-User
+Allow: /sobre/
+Allow: /llms.txt
 Allow: /sitemap.xml
 Disallow: /
 

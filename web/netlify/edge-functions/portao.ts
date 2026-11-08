@@ -78,7 +78,7 @@ export default async function portao(req: Request, context: Contexto): Promise<R
   // em modo CORS sem credenciais) e nao dao acesso a nada.
   // O robots.txt e o sitemap.xml saem SEM o "noindex" do netlify.toml: com ele
   // o Search Console recusava o sitemap ("Erro de HTTP geral").
-  if (caminho === "/robots.txt" || caminho === "/sitemap.xml") {
+  if (caminho === "/robots.txt" || caminho === "/sitemap.xml" || caminho === "/llms.txt") {
     const r = await context.next();
     const cab = new Headers(r.headers);
     cab.delete("X-Robots-Tag");
