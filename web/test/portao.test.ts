@@ -27,7 +27,9 @@ test("passe válido passa; adulterado, vencido ou de outro navegador não", asyn
   assert.equal(await verificarPasse("outro-segredo-qualquer-bem-longo", passe, UA, agora), false, "outro segredo");
   const [expira, sig] = passe.split(".");
   assert.equal(await verificarPasse(SEGREDO, `${Number(expira) + 999999}.${sig}`, UA, agora), false, "validade esticada");
-  const trocado = sig.slice(0, -1) + (sig.endsWith("A") ? "B" : "A");
+  // Troca um caractere do meio: o último de um base64url tem bits de folga e pode não mudar a assinatura.
+  const meio = Math.floor(sig.length / 2);
+  const trocado = sig.slice(0, meio) + (sig[meio] === "A" ? "B" : "A") + sig.slice(meio + 1);
   assert.equal(await verificarPasse(SEGREDO, `${expira}.${trocado}`, UA, agora), false, "assinatura trocada");
   for (const lixo of [null, "", "abc", "1.2", `${expira}.`, `.${sig}`, passe + "x"]) {
     assert.equal(await verificarPasse(SEGREDO, lixo, UA, agora), false, `lixo: ${lixo}`);
@@ -170,6 +172,13 @@ test("Edge Function: desafio, verificação, cookie e passagem", { timeout: 60_0
     await portao(new Request("https://site.exemplo" + barrado, { headers: GOOGLEBOT }), c.ctx);
     assert.equal(c.chamou(), false, barrado);
   }
+  // llms.txt sai sem o "noindex" do netlify.toml.
+  r = await portao(new Request("https://site.exemplo/llms.txt"), {
+    next: async () => new Response("txt", { status: 200, headers: { "X-Robots-Tag": "noindex, nofollow" } }),
+    deploy: { context: "production" },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get("x-robots-tag"), null);
   // 5. Nonce errado: 403, sem cookie.
   const post = (nonce: string, origem = "https://site.exemplo") => new Request("https://site.exemplo/__portao/verificar", {
     method: "POST", headers: { "user-agent": UA, "content-type": "application/json", origin: origem },
